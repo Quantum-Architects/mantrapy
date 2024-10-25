@@ -9,12 +9,12 @@ class TxResult:
     gas_used: str
 
     @classmethod
-    def from_dict(cls, data: dict) -> "TxResult":
+    def from_dict(cls, data: dict) -> 'TxResult':
 
         return cls(
-            code=data["code"],
-            gas_wanted=data["gas_wanted"],
-            gas_used=data["gas_used"],
+            code=data['code'],
+            gas_wanted=data['gas_wanted'],
+            gas_used=data['gas_used'],
         )
 
 
@@ -24,11 +24,11 @@ class ResultTx:
     tx_result: TxResult
 
     @classmethod
-    def from_dict(cls, data: dict) -> "ResultTx":
+    def from_dict(cls, data: dict) -> 'ResultTx':
 
-        tx_result = TxResult.from_dict(data["tx_result"])
+        tx_result = TxResult.from_dict(data['tx_result'])
 
         return cls(
-            height=data["tx_result"]["height"],
+            height=data['tx_result']['height'],
             tx_result=tx_result,
         )

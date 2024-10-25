@@ -3,6 +3,7 @@ from src.webhooks.webhook import Webhook
 
 
 class SmartContractWebhook(Webhook):
+
     def __init__(self, websocket_url, webhook_url):
         # Customize process function with the specific address
         process_fn = lambda events: _get_smart_contracts_events(events)

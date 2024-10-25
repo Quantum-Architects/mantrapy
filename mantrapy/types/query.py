@@ -1,4 +1,5 @@
-from base64 import b64decode, b64encode
+from base64 import b64decode
+from base64 import b64encode
 from dataclasses import dataclass
 from typing import Optional
 
@@ -21,14 +22,16 @@ class PageResponse:
     def to_dict(self) -> dict:
         """Convert to dictionary format, encoding bytes as base64 for JSON compatibility"""
         return {
-            "next_key": b64encode(self.next_key).decode() if self.next_key else None,
-            "total": self.total,
+            'next_key':
+            b64encode(self.next_key).decode() if self.next_key else None,
+            'total': self.total,
         }
 
     @classmethod
-    def from_dict(cls, data: dict) -> "PageResponse":
+    def from_dict(cls, data: dict) -> 'PageResponse':
         """Create PageResponse from dictionary data"""
         return cls(
-            next_key=b64decode(data["next_key"]) if data.get("next_key") else None,
-            total=int(data["total"]) if data.get("total") else None,
+            next_key=b64decode(data['next_key'])
+            if data.get('next_key') else None,
+            total=int(data['total']) if data.get('total') else None,
         )

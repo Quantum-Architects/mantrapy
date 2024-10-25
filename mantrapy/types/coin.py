@@ -9,5 +9,6 @@ class Coin:
 
 
 class Coins(List[Coin]):
+
     def __init__(self, *args):
         super().__init__(*args)
