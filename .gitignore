@@ -28,4 +28,4 @@ share/python-wheels/
 .installed.cfg
 *.egg
 MANIFEST
-proto
+proto2
