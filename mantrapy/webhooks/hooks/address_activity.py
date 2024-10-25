@@ -1,5 +1,5 @@
 from mantrapy.webhooks.modules.utils import get_account_events
-from mantrapy.webhooks.webhooks.webhook import Webhook
+from mantrapy.webhooks.hooks.webhook import Webhook
 
 
 # Wrapper function to set address as a fixed parameter

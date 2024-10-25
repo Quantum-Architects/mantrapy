@@ -1,7 +1,7 @@
 import asyncio
 
 from mantrapy.webhooks.config import Config
-from mantrapy.webhooks.webhooks.smart_contract import SmartContractWebhook
+from mantrapy.webhooks.hooks.smart_contract import SmartContractWebhook
 
 address = 'mantra13pxn9n3qw79e03844rdadagmg0nshmwf4txc8r'
 
