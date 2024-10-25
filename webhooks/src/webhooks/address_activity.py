@@ -8,6 +8,7 @@ def account_event_processor(address: str):
 
 
 class AddressActivityWebhook(Webhook):
+
     def __init__(self, websocket_url, webhook_url, address):
         # Customize process function with the specific address
         process_fn = account_event_processor(address)

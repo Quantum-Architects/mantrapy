@@ -1,10 +1,12 @@
 class PubKey:
+
     def __init__(self, key_type: str, key: str):
         self.key_type = key_type
         self.key = key
 
 
 class Account:
+
     def __init__(
         self,
         key_type: str,
@@ -21,5 +23,6 @@ class Account:
 
 
 class AccountResponse:
+
     def __init__(self, account: Account):
         self.account = account

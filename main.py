@@ -5,4 +5,3 @@ from mantrapy.wallet.wallet import test_wallet
 # t.bank_send("",1,"")
 w = test_wallet()
 print(w.address)
-

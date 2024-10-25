@@ -1,9 +1,13 @@
 import os
 
+
 class Constants:
 
     def __init__(self):
-        self.rest_endpoint = os.getenv('REST_ENDPOINT', 'https://api.mantrachain.io')
+        self.rest_endpoint = os.getenv(
+            'REST_ENDPOINT',
+            'https://api.mantrachain.io',
+        )
         self.memo = os.getenv('MEMO', '')
         self.fee = os.getenv('FEE', '20')
         self.gas_limit = os.getenv('GAS_LIMIT', '200000')
@@ -13,4 +17,3 @@ class Constants:
     def testnet(self):
         self.rest_endpoint = 'https://api.dukong.mantrachain.io/'
         self.denom = 'uom'
-

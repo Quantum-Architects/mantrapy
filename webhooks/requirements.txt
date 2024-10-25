@@ -1,4 +1,4 @@
-requests  
-pydantic  
+pydantic
 pydantic_settings
+requests
 websockets
