@@ -7,6 +7,8 @@ Supported queries:
 - smart contract calls (e.g. contract=mantra1...)
 """
 
+import re
+from typing import Callable
 from mantrapy.webhooks.event_processor import EventProcessor
 from mantrapy.webhooks.hooks.address_activity import account_event_processor
 from mantrapy.webhooks.modules.smart_contract import get_smart_contract_events
@@ -17,49 +19,60 @@ from mantrapy.webhooks.modules.utils import (
 )
 
 
-def get_event_processor(webhook_url: str, query: str) -> EventProcessor:
-    """Get the appropriate EventProcessor based on the query type."""
-    if "module=" in query:
-        module_value = extract_value(query, "module")
-        return EventProcessor(
-            webhook_url, lambda events: get_module_events(module_value, events)
-        ).process_events
+def get_event_processor(webhook_url: str, query: str) -> Callable:
+    """Get an EventProcessor based on multiple query conditions."""
 
-    elif "event.type=" in query:
-        event_type_value = extract_value(query, "event.type")
-        return EventProcessor(
-            webhook_url,
-            lambda events: get_events_by_type(event_type_value, events),
-        ).process_events
+    # Split the query string by `&` to support multiple conditions
+    conditions = query.split("&")
+    condition_processors = []
 
-    elif "event.value=" in query:
-        event_value = extract_value(query, "event.value")
-        return EventProcessor(
-            webhook_url, lambda events: get_events_by_value(event_value, events)
-        ).process_events
+    for condition in conditions:
+        if "module=" in condition:
+            module_value = extract_value(condition, "module")
+            condition_processors.append(
+                lambda events: get_module_events(module_value, events)
+            )
 
-    elif "address=" in query:
-        address_value = extract_value(query, "address")
-        return EventProcessor(webhook_url, account_event_processor(address_value))
+        elif "type=" in condition:
+            type_value = extract_value(condition, "type")
+            condition_processors.append(
+                lambda events: get_events_by_type(type_value, events)
+            )
 
-    elif "contract=" in query:
-        contract_addr = extract_value(query, "contract")
-        return EventProcessor(
-            webhook_url,
-            lambda events: get_smart_contract_events(contract_addr, events),
-        ).process_events
+        elif "value=" in condition:
+            value = extract_value(condition, "value")
+            condition_processors.append(
+                lambda events: get_events_by_value(value, events)
+            )
 
-    else:
-        raise ValueError(f"Unsupported query: {query}")
+        elif "address=" in condition:
+            address_value = extract_value(condition, "address")
+            condition_processors.append(account_event_processor(address_value))
+
+        elif "contract=" in condition:
+            contract_addr = extract_value(condition, "contract")
+            condition_processors.append(
+                lambda events, contract=contract_addr: get_smart_contract_events(
+                    contract, events
+                )
+            )
+
+        else:
+            raise ValueError(f"Unsupported query condition: {condition}")
+
+    # Combine all conditions for processing
+    def combined_processor(events):
+        filtered_events = events
+        for processor in condition_processors:
+            filtered_events = processor(filtered_events)
+        return filtered_events
+
+    return EventProcessor(webhook_url, combined_processor).process_events
 
 
 def extract_value(query: str, key: str) -> str:
-    """Extract the value for the specified key from the query string."""
-    key_value_pair = f"{key}="
-    if key_value_pair in query:
-        start_index = query.index(key_value_pair) + len(key_value_pair)
-        end_index = query.find("&", start_index)
-        if end_index == -1:  # If no '&' is found, get till the end of the string
-            end_index = len(query)
-        return query[start_index:end_index]
-    return None
+    """Extracts the value for a given key from the query string."""
+    match = re.search(f"{key}=([^&]+)", query)
+    if match:
+        return match.group(1)
+    raise ValueError(f"Invalid query format; missing {key}")
