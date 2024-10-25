@@ -24,7 +24,7 @@ QUERY_PATHS = {
 }
 
 
-class Querier:
+class Client:
     """
     Querier defines a type to perform queries against the Mantra chain.
     """
