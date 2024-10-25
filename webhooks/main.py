@@ -1,7 +1,7 @@
 import asyncio
-from lib.config import Config
-from lib.webhooks.address_activity import AddressActivityWebhook
-from lib.webhooks.smart_contract import SmartContractWebhook
+from src.config import Config
+from src.webhooks.address_activity import AddressActivityWebhook
+from src.webhooks.smart_contract import SmartContractWebhook
 
 address = "mantra13pxn9n3qw79e03844rdadagmg0nshmwf4txc8r"
 
