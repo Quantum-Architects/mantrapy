@@ -15,12 +15,10 @@ class EventProcessor:
 
     def process_events(self, events):
         processed_events = self.process_fn(events)
-        print(len(processed_events))
         if len(processed_events) == 0:
             return
         notification = {"events": processed_events}
-        print(notification)
-        # self.send_notification(notification)
+        self.send_notification(notification)
 
     @retry(
         stop=stop_after_attempt(3),
