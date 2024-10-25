@@ -14,12 +14,18 @@ class QueryBalanceResponse:
     def from_dict(cls, data: dict) -> "QueryBalanceResponse":
         return cls(
             balance=Coin(
-                denom=data["balances"]["denom"], amount=data["balance"]["amount"]
-            )
+                denom=data["balances"]["denom"],
+                amount=data["balance"]["amount"],
+            ),
         )
 
     def to_dict(self) -> dict:
-        return {"balance": {"denom": self.balance.denom, "amount": self.balance.amount}}
+        return {
+            "balance": {
+                "denom": self.balance.denom,
+                "amount": self.balance.amount,
+            },
+        }
 
 
 @dataclass
@@ -39,13 +45,18 @@ class QueryAllBalancesResponse:
         )
 
         return cls(
-            balances=coins, pagination=PageResponse.from_dict(data["pagination"])
+            balances=coins,
+            pagination=PageResponse.from_dict(data["pagination"]),
         )
 
     def to_dict(self) -> dict:
         return {
             "balances": [
-                {"denom": coin.denom, "amount": coin.amount} for coin in self.balances
+                {
+                    "denom": coin.denom,
+                    "amount": coin.amount,
+                }
+                for coin in self.balances
             ],
             "pagination": self.pagination.to_dict(),
         }
