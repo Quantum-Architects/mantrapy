@@ -29,6 +29,6 @@ class ResultTx:
         tx_result = TxResult.from_dict(data["tx_result"])
 
         return cls(
-            height=data["tx_result"]["height"],
+            height=data["height"],
             tx_result=tx_result,
         )

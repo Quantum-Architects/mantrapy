@@ -20,7 +20,7 @@ QUERY_PATHS = {
     "status": "/status",
     "block_by_hash": "block?hash={hash}",
     "block": "block?height={height}",
-    "tx": "/tx?hash={_hash}",
+    "tx": "/tx?hash={hash}",
 }
 
 
@@ -84,7 +84,6 @@ class Querier:
                 )
 
             except Exception as e:
-                print("CATCHING EXCEPTION")
                 if attempt == self.max_retries - 1:
                     return QueryResponse(
                         error=str(e),
@@ -93,6 +92,9 @@ class Querier:
 
         raise Exception("The request should be performed at least once.")
 
+    # ---------------------------------------------------------------------------------------------
+    # API
+    # ---------------------------------------------------------------------------------------------
     def get_account(self, address: str) -> QueryResponse[QueryAccountResponse]:
         """
         Query the account associated with a particular address.
@@ -110,7 +112,9 @@ class Querier:
         try:
 
             account = Account.from_dict(resp.data)
-            return QueryResponse(QueryAccountResponse(account=account))
+            return QueryResponse(
+                data=QueryAccountResponse(account=account), status_code=resp.status_code
+            )
 
         except KeyError as e:
             return QueryResponse(
@@ -133,8 +137,10 @@ class Querier:
             raise Exception("Data returned by query is nil")
 
         try:
-
-            return QueryResponse(QueryAllBalancesResponse.from_dict(resp.data))
+            return QueryResponse(
+                data=QueryAllBalancesResponse.from_dict(resp.data),
+                status_code=resp.status_code,
+            )
 
         except KeyError as e:
             return QueryResponse(
@@ -142,48 +148,155 @@ class Querier:
                 status_code=resp.status_code,
             )
 
-    def get_height(self) -> str:
+    # ---------------------------------------------------------------------------------------------
+    # RPC
+    # ---------------------------------------------------------------------------------------------
+    def _get_sync_info(self) -> QueryResponse[SyncInfo]:
         url = self.create_rpc_url(QUERY_PATHS["status"])
-        resp = requests.get(url, timeout=TIMEOUT)
+        resp = self._make_request(url)
 
-        sync_info = SyncInfo.from_dict(resp.json()["result"]["sync_info"])
-        return sync_info.latest_block_height
+        if not resp.is_success():
+            return resp
 
-    def get_last_hash(self):
-        url = self.create_rpc_url(QUERY_PATHS["status"])
-        resp = requests.get(url, timeout=TIMEOUT)
+        if not resp.data:
+            raise Exception("Data returned by query is nil")
 
-        sync_info = SyncInfo.from_dict(resp.json()["result"]["sync_info"])
-        return sync_info.latest_block_hash
+        try:
+            return QueryResponse(
+                data=SyncInfo.from_dict(resp.data), status_code=resp.status_code
+            )
 
-    def get_block_by_height(self, height: str) -> ResultBlock:
+        except ValueError as e:
+            raise ValueError(f"Invalid data format: {e}")
+        except KeyError as e:
+            return QueryResponse(
+                error=f"Invalid response format: {str(e)}",
+                status_code=resp.status_code,
+            )
+
+    def get_height(self) -> QueryResponse[str]:
+        """
+        Query the height of the last block.
+        """
+        sync_info_resp = self._get_sync_info()
+
+        if not sync_info_resp.data:
+            raise Exception("Data returned by query is nil")
+
+        try:
+            return QueryResponse(
+                data=sync_info_resp.data.latest_block_height,
+                status_code=sync_info_resp.status_code,
+            )
+        except KeyError as e:
+            return QueryResponse(
+                error=f"Invalid response format: {str(e)}",
+                status_code=sync_info_resp.status_code,
+            )
+
+    def get_last_hash(self) -> QueryResponse[str]:
+        """
+        Query the hash of the last block.
+        """
+        sync_info_resp = self._get_sync_info()
+
+        if not sync_info_resp.data:
+            raise Exception("Data returned by query is nil")
+
+        try:
+            return QueryResponse(
+                data=sync_info_resp.data.latest_block_hash,
+                status_code=sync_info_resp.status_code,
+            )
+        except KeyError as e:
+            return QueryResponse(
+                error=f"Invalid response format: {str(e)}",
+                status_code=sync_info_resp.status_code,
+            )
+
+    def get_block_by_height(self, height: str) -> QueryResponse[ResultBlock]:
+        """
+        Query a block associated with a particular height.
+        """
         url = self.create_rpc_url(QUERY_PATHS["block"].format(height=height))
-        resp = requests.get(url, timeout=TIMEOUT)
+        resp = self._make_request(url)
 
-        result = resp.json()["result"]
-        block = Block.from_dict(result["block"])
-        block_id = BlockID.from_dict(result["block_id"])
+        if not resp.is_success():
+            return resp
 
-        return ResultBlock(
-            block_id=block_id,
-            block=block,
-        )
+        if not resp.data:
+            raise Exception("Data returned by query is nil")
 
-    def get_block_by_hash(self, _hash: str) -> ResultBlock:
+        try:
+            block = Block.from_dict(resp.data["result"]["block"])
+            block_id = BlockID.from_dict(resp.data["result"]["block_id"])
+
+            return QueryResponse(
+                data=ResultBlock(
+                    block_id=block_id,
+                    block=block,
+                ),
+                status_code=resp.status_code,
+            )
+
+        except KeyError as e:
+            return QueryResponse(
+                error=f"Invalid response format: {str(e)}",
+                status_code=resp.status_code,
+            )
+
+    def get_block_by_hash(self, _hash: str) -> QueryResponse[ResultBlock]:
+        """
+        Query a block associated with a particular hash.
+        """
         url = self.create_rpc_url(QUERY_PATHS["block_by_hash"].format(hash=_hash))
-        resp = requests.get(url, timeout=TIMEOUT)
+        resp = self._make_request(url)
 
-        result = resp.json()["result"]
-        block = Block.from_dict(result["block"])
-        block_id = BlockID.from_dict(result["block_id"])
+        if not resp.is_success():
+            return resp
 
-        return ResultBlock(
-            block_id=block_id,
-            block=block,
-        )
+        if not resp.data:
+            raise Exception("Data returned by query is nil")
 
-    def get_tx_by_hash(self, _hash: str):
+        try:
+            block = Block.from_dict(resp.data["result"]["block"])
+            block_id = BlockID.from_dict(resp.data["result"]["block_id"])
+
+            return QueryResponse(
+                data=ResultBlock(
+                    block_id=block_id,
+                    block=block,
+                ),
+                status_code=resp.status_code,
+            )
+
+        except KeyError as e:
+            return QueryResponse(
+                error=f"Invalid response format: {str(e)}",
+                status_code=resp.status_code,
+            )
+
+    def get_tx_by_hash(self, _hash: str) -> QueryResponse[ResultTx]:
+        """
+        Query a transaction associated with a particular hash.
+        """
         url = self.create_rpc_url(QUERY_PATHS["tx"].format(hash=_hash))
-        resp = requests.get(url, timeout=TIMEOUT)
+        resp = self._make_request(url)
 
-        return ResultTx.from_dict(resp.json()["result"])
+        if not resp.is_success():
+            return resp
+
+        if not resp.data:
+            raise Exception("Data returned by query is nil")
+
+        try:
+            return QueryResponse(
+                data=ResultTx.from_dict(resp.data["result"]),
+                status_code=resp.status_code,
+            )
+
+        except KeyError as e:
+            return QueryResponse(
+                error=f"Invalid response format: {str(e)}",
+                status_code=resp.status_code,
+            )
