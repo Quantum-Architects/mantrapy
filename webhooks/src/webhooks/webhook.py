@@ -18,10 +18,10 @@ class Webhook:
                     ws_event = json.loads(ws_event)
                 if 'events' in ws_event.get(
                         'result',
-                    {},
+                        {},
                 ) and 'message.msg_index' in ws_event['result'].get(
                         'events',
-                    {},
+                        {},
                 ):
                     events = ws_event['result']['data']['value']['TxResult'][
                         'result'

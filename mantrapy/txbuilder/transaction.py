@@ -4,14 +4,12 @@ from google.protobuf.message import Message
 from mantrapy.proto.cosmos.base.v1beta1.coin_pb2 import Coin
 from mantrapy.proto.cosmos.crypto.secp256k1.keys_pb2 import PubKey as Secp256PubKey
 from mantrapy.proto.cosmos.tx.signing.v1beta1.signing_pb2 import SIGN_MODE_DIRECT
-from mantrapy.proto.cosmos.tx.signing.v1beta1.signing_pb2 import SignMode
 from mantrapy.proto.cosmos.tx.v1beta1.tx_pb2 import AuthInfo
 from mantrapy.proto.cosmos.tx.v1beta1.tx_pb2 import Fee
 from mantrapy.proto.cosmos.tx.v1beta1.tx_pb2 import ModeInfo
 from mantrapy.proto.cosmos.tx.v1beta1.tx_pb2 import SignDoc
 from mantrapy.proto.cosmos.tx.v1beta1.tx_pb2 import SignerInfo
 from mantrapy.proto.cosmos.tx.v1beta1.tx_pb2 import TxBody
-from mantrapy.proto.cosmos.tx.v1beta1.tx_pb2 import TxRaw
 
 
 def create_body_bytes(msg: Message, memo: str):
