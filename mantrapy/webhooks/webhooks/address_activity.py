@@ -1,10 +1,10 @@
-from src.modules.utils import _get_account_events
-from src.webhooks.webhook import Webhook
+from mantrapy.webhooks.modules.utils import get_account_events
+from mantrapy.webhooks.webhooks.webhook import Webhook
 
 
 # Wrapper function to set address as a fixed parameter
 def account_event_processor(address: str):
-    return lambda events: _get_account_events(address, events)
+    return lambda events: get_account_events(address, events)
 
 
 class AddressActivityWebhook(Webhook):

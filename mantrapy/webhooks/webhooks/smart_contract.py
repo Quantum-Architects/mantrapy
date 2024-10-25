@@ -1,5 +1,5 @@
-from src.modules.smart_contract import _get_smart_contracts_events
-from src.webhooks.webhook import Webhook
+from mantrapy.webhooks.modules.smart_contract import get_smart_contracts_events
+from mantrapy.webhooks.webhooks.webhook import Webhook
 
 
 class SmartContractWebhook(Webhook):
@@ -9,5 +9,5 @@ class SmartContractWebhook(Webhook):
         super().__init__(
             websocket_url,
             webhook_url,
-            _get_smart_contracts_events,
+            get_smart_contracts_events,
         )

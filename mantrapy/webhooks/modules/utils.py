@@ -11,20 +11,20 @@ class CosmosEvent:
     attributes: List[Attribute]
 
 
-def _get_event(event_type, events: List[CosmosEvent]):
+def get_event(event_type, events: List[CosmosEvent]):
     for e in events:
         if e.type == event_type:
             return e
 
 
-def _get_events_by_type(
+def get_events_by_type(
     event_type,
     events: List[CosmosEvent],
 ) -> List[CosmosEvent]:
     return [e for e in events if e['type'] == event_type]
 
 
-def _get_events_by_attr_value(
+def get_events_by_attr_value(
     attribute: str,
     attr_val: str,
     events: List[CosmosEvent],
@@ -37,7 +37,7 @@ def _get_events_by_attr_value(
     ]
 
 
-def _get_events_by_value(
+def get_events_by_value(
     attr_val,
     events: List[CosmosEvent],
 ) -> List[CosmosEvent]:
@@ -47,21 +47,21 @@ def _get_events_by_value(
     ]
 
 
-def _get_event_attribute(attribute, event: CosmosEvent):
+def get_event_attribute(attribute, event: CosmosEvent):
     for a in event['attributes']:
         if a.key == attribute:
             return a
 
 
-def _get_module_events(module, events: List[CosmosEvent]):
-    return _get_events_by_attr_value('module', module, events)
+def get_module_events(module, events: List[CosmosEvent]):
+    return get_events_by_attr_value('module', module, events)
 
 
-def _get_account_events(addr, events: List[CosmosEvent]):
-    return _get_events_by_value(addr, events)
+def get_account_events(addr, events: List[CosmosEvent]):
+    return get_events_by_value(addr, events)
 
 
-def _only_mod_events(events: List[CosmosEvent]) -> List[CosmosEvent]:
+def only_mod_events(events: List[CosmosEvent]) -> List[CosmosEvent]:
     if events is None:
         return []
     return [
@@ -72,6 +72,6 @@ def _only_mod_events(events: List[CosmosEvent]) -> List[CosmosEvent]:
     ]
 
 
-def _get_account_modules_events(addr, events):
-    all_events = _get_account_events(addr, events)
-    return _only_mod_events(all_events)
+def get_account_modules_events(addr, events):
+    all_events = get_account_events(addr, events)
+    return only_mod_events(all_events)

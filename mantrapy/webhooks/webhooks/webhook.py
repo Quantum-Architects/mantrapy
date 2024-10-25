@@ -1,7 +1,7 @@
 import json
 
-from ..chain_client import ChainClient
-from ..event_processor import EventProcessor
+from mantrapy.webhooks.chain_client import ChainClient
+from mantrapy.webhooks.event_processor import EventProcessor
 
 
 # Generic Webhook class
