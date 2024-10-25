@@ -27,39 +27,44 @@ chain_client = ChainClient(websocket_url)
 registered_hooks_cache = {}
 
 
+async def run_process_fn(process_fn, events, hook_id):
+    """Wrapper to run process_fn with error handling."""
+    try:
+        print(hook_id)
+        await process_fn(events)
+    except Exception as e:
+        print(f"Error processing event in hook {hook_id}: {e}")
+
+
 async def process_events():
     """Listen for events from the ChainClient and post to registered webhooks."""
     async for ws_event in chain_client.subscribe("tm.event='Tx'"):
-        while True:
-            try:
-                async for ws_event in chain_client.subscribe("tm.event='Tx'"):
-                    try:
-                        # Decode the incoming message if it's JSON
-                        if isinstance(ws_event, str):
-                            ws_event = json.loads(ws_event)
-                        if "events" in ws_event.get(
-                            "result", {}
-                        ) and "message.msg_index" in ws_event["result"].get(
-                            "events", {}
-                        ):
-                            events = ws_event["result"]["data"]["value"]["TxResult"][
-                                "result"
-                            ]["events"]
+        try:
+            # Decode the incoming message if it's JSON
+            if isinstance(ws_event, str):
+                ws_event = json.loads(ws_event)
+            if "events" in ws_event.get(
+                "result", {}
+            ) and "message.msg_index" in ws_event["result"].get("events", {}):
+                events = ws_event["result"]["data"]["value"]["TxResult"]["result"][
+                    "events"
+                ]
 
-                            # Iterate through the cached hooks and post the event data
-                            for _, process_fn in registered_hooks_cache.items():
-                                process_fn(events)
+                # Create a list to hold all processing tasks
+                tasks = []
 
-                    except (json.JSONDecodeError, KeyError) as e:
-                        print(f"Error parsing event data: {e}")
-                        print("Raw event data:", ws_event)
+                # Iterate through the cached hooks and create a task for each process_fn
+                for hook_id, process_fn in registered_hooks_cache.items():
+                    tasks.append(
+                        asyncio.create_task(run_process_fn(process_fn, events, hook_id))
+                    )
 
-            except ConnectionError as conn_err:
-                print(f"Connection error: {conn_err}. Retrying...")
-                await asyncio.sleep(2)  # Backoff before retrying
-            except Exception as e:
-                print(f"Unexpected error in process_events: {e}")
-                await asyncio.sleep(2)
+                # Wait for all tasks to complete
+                await asyncio.gather(*tasks)
+
+        except (json.JSONDecodeError, KeyError) as e:
+            print(f"Error parsing event data: {e}")
+            print("Raw event data:", ws_event)
 
 
 @asynccontextmanager
@@ -82,7 +87,10 @@ async def lifespan(app: FastAPI):
     yield
     # Close the WebSocket connection on server shutdow
     if chain_client.websocket:
-        await chain_client.websocket.close()
+        try:
+            await chain_client.websocket.close()
+        except Exception as e:
+            print(f"Error closing ws connection: {e}")
 
 
 app = FastAPI(lifespan=lifespan)
