@@ -24,10 +24,20 @@ def get_events_by_type(
     return [e for e in events if e['type'] == event_type]
 
 
+def get_events_by_attribute(
+    attr,
+    events: List[CosmosEvent],
+) -> List[CosmosEvent]:
+    return [
+        e for e in events
+        if any(a['key'] == attr for a in e['attributes'])
+    ]
+
 def get_events_by_attr_value(
     attribute: str,
     attr_val: str,
-    events: List[CosmosEvent],
+    events: 
+    List[CosmosEvent],
 ) -> List[CosmosEvent]:
     return [
         e for e in events if any(
