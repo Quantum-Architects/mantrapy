@@ -1,16 +1,16 @@
 import requests
 
-from mantrapy.types.account import Account, AccountResponse, PubKey
-from mantrapy.types.bank import QueryAllBalancesResponse
-from mantrapy.types.block import Block, BlockID, ResultBlock
-from mantrapy.types.consensus import SyncInfo
-from mantrapy.types.tx import ResultTx
+from mantrapy.querier.types import QueryResponse
+from mantrapy.types.cometbft.block import Block, BlockID, ResultBlock
+from mantrapy.types.cometbft.consensus import SyncInfo
+from mantrapy.types.cometbft.tx import ResultTx
+from mantrapy.types.cosmossdk.account import Account, QueryAccountResponse
+from mantrapy.types.cosmossdk.bank import QueryAllBalancesResponse
 
-"""
-Querier defines a type to perform queries against the Mantra chain.
-"""
+TIMEOUT = 10
+MAX_RETRIES = 3
+RETRY_DELAY = 1
 
-TIMEOUT = 1
 API = "https://api.mantrachain.io"
 RPC = "https://rpc.mantrachain.io"
 
@@ -25,43 +25,122 @@ QUERY_PATHS = {
 
 
 class Querier:
+    """
+    Querier defines a type to perform queries against the Mantra chain.
+    """
 
-    def __init__(self, api: str, rpc: str) -> None:
-        self.api = api
-        self.rpc = rpc
+    def __init__(
+        self,
+        api: str,
+        rpc: str,
+        timeout: int = TIMEOUT,
+        max_retries: int = MAX_RETRIES,
+        retry_delay: int = RETRY_DELAY,
+    ) -> None:
+        """
+        Initialize the class with base API and RPC URLs.
+        """
+        # Cosmos SDK endpoint.
+        self.api = api.rstrip("/")
+        # CometBFT endpoint.
+        self.rpc = rpc.rstrip("/")
+
+        # Requests parameters.
+        self.timeout = timeout
+        self.max_retries = max_retries
+        self.retry_delay = retry_delay
 
     def create_api_url(self, path: str) -> str:
+        """
+        Construct a full API URL by appending the given path to the base API URL.
+        """
         return self.api + path
 
     def create_rpc_url(self, path: str) -> str:
+        """
+        Construct a full RPC URL by appending the given path to the base RPC URL.
+        """
         return self.rpc + path
 
-    # ACCOUNT
-    def get_account(self, address: str) -> AccountResponse:
+    def _make_request(self, url: str, method: str = "GET", **kwargs) -> QueryResponse:
+        """
+        Make HTTP request with retries and error handling.
+        """
+
+        # Repeat the request if it is failing
+        for attempt in range(self.max_retries):
+            try:
+                response = requests.request(
+                    method,
+                    url,
+                    timeout=self.timeout,
+                    **kwargs,
+                )
+                data = response.json()
+
+                return QueryResponse(
+                    data=data,
+                    status_code=response.status_code,
+                )
+
+            except Exception as e:
+                print("CATCHING EXCEPTION")
+                if attempt == self.max_retries - 1:
+                    return QueryResponse(
+                        error=str(e),
+                        status_code=500,
+                    )
+
+        raise Exception("The request should be performed at least once.")
+
+    def get_account(self, address: str) -> QueryResponse[QueryAccountResponse]:
+        """
+        Query the account associated with a particular address.
+        """
+
         url = self.create_api_url(QUERY_PATHS["account"].format(address=address))
-        resp = requests.get(url, timeout=TIMEOUT)
-        json_resp = resp.json()
+        resp = self._make_request(url)
 
-        account_data = json_resp["account"]
-        pub_key_data = account_data["pub_key"]
-        pub_key = PubKey(key_type=pub_key_data["@type"], key=pub_key_data["key"])
+        if not resp.is_success():
+            return resp
 
-        account = Account(
-            key_type=account_data["@type"],
-            address=account_data["address"],
-            pub_key=pub_key,
-            account_number=account_data["account_number"],
-            sequence=account_data["sequence"],
-        )
+        if not resp.data:
+            raise Exception("Data returned by query is nil")
 
-        return AccountResponse(account=account)
+        try:
 
-    def get_balances(self, address: str) -> QueryAllBalancesResponse:
+            account = Account.from_dict(resp.data)
+            return QueryResponse(QueryAccountResponse(account=account))
+
+        except KeyError as e:
+            return QueryResponse(
+                error=f"Invalid response format: {str(e)}",
+                status_code=resp.status_code,
+            )
+
+    def get_balances(self, address: str) -> QueryResponse[QueryAllBalancesResponse]:
+        """
+        Query the balance associated with a particular address.
+        """
+
         url = self.create_api_url(QUERY_PATHS["balances"].format(address=address))
-        resp = requests.get(url, timeout=TIMEOUT)
+        resp = self._make_request(url)
 
-        print(resp)
-        return QueryAllBalancesResponse.from_dict(data=resp.json())
+        if not resp.is_success():
+            return resp
+
+        if not resp.data:
+            raise Exception("Data returned by query is nil")
+
+        try:
+
+            return QueryResponse(QueryAllBalancesResponse.from_dict(resp.data))
+
+        except KeyError as e:
+            return QueryResponse(
+                error=f"Invalid response format: {str(e)}",
+                status_code=resp.status_code,
+            )
 
     def get_height(self) -> str:
         url = self.create_rpc_url(QUERY_PATHS["status"])
