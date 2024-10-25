@@ -8,3 +8,8 @@ pydantic
 pydantic_settings
 requests==2.32.3
 websockets
+fastapi 
+uvicorn
+httpx
+sqlalchemy
+tenacity
