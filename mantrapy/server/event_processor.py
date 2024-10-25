@@ -3,14 +3,14 @@ Supported queries:
 - module (e.g. module=staking)
 - event type (e.g. event.type=transfer)
 - event value (e.g. event.value=mantra1...)
-- addess (e.g. address=mantra1...)
+- address (e.g. address=mantra1...)
 - smart contract calls (e.g. contract=mantra1...)
 """
 
-from webhooks.event_processor import EventProcessor
-from webhooks.hooks.address_activity import account_event_processor
-from webhooks.modules.smart_contract import get_smart_contract_events
-from webhooks.modules.utils import (
+from mantrapy.webhooks.event_processor import EventProcessor
+from mantrapy.webhooks.hooks.address_activity import account_event_processor
+from mantrapy.webhooks.modules.smart_contract import get_smart_contract_events
+from mantrapy.webhooks.modules.utils import (
     get_events_by_type,
     get_events_by_value,
     get_module_events,
@@ -23,20 +23,20 @@ def get_event_processor(webhook_url: str, query: str) -> EventProcessor:
         module_value = extract_value(query, "module")
         return EventProcessor(
             webhook_url, lambda events: get_module_events(module_value, events)
-        )
+        ).process_events
 
     elif "event.type=" in query:
         event_type_value = extract_value(query, "event.type")
         return EventProcessor(
             webhook_url,
             lambda events: get_events_by_type(event_type_value, events),
-        )
+        ).process_events
 
     elif "event.value=" in query:
         event_value = extract_value(query, "event.value")
         return EventProcessor(
             webhook_url, lambda events: get_events_by_value(event_value, events)
-        )
+        ).process_events
 
     elif "address=" in query:
         address_value = extract_value(query, "address")
@@ -47,7 +47,7 @@ def get_event_processor(webhook_url: str, query: str) -> EventProcessor:
         return EventProcessor(
             webhook_url,
             lambda events: get_smart_contract_events(contract_addr, events),
-        )
+        ).process_events
 
     else:
         raise ValueError(f"Unsupported query: {query}")
