@@ -30,7 +30,6 @@ registered_hooks_cache = {}
 async def run_process_fn(process_fn, events, hook_id):
     """Wrapper to run process_fn with error handling."""
     try:
-        print(hook_id)
         await process_fn(events)
     except Exception as e:
         print(f"Error processing event in hook {hook_id}: {e}")
@@ -99,15 +98,14 @@ app = FastAPI(lifespan=lifespan)
 @app.post("/webhooks/")
 async def create_webhook(req: WebhookRequest):
     """Create a new webhook and persist it in the database."""
+    # Generate a new unique hook ID (UUID)
+    hook_id = str(uuid4())
     # Attempt to create an event processor
     try:
-        processor = get_event_processor(req.url, req.query)
+        processor = get_event_processor(hook_id, req.url, req.query)
     except ValueError as e:
         # Return a 404 error if get_event_processor fails
         raise HTTPException(status_code=404, detail=str(e))
-
-    # Generate a new unique hook ID (UUID)
-    hook_id = str(uuid4())
 
     # with SessionLocal() as db:
     #     new_webhook = Webhook(id=hook_id, query=query, url=url)

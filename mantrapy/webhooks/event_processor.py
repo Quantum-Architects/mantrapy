@@ -13,11 +13,21 @@ class EventProcessor:
         self.webhook_url = webhook_url
         self.process_fn = process_event_fn
 
+    def set_query(self, query):
+        self.query = query
+
+    def set_hook_id(self, hook_id):
+        self.hook_id = hook_id
+
     def process_events(self, events):
         processed_events = self.process_fn(events)
         if len(processed_events) == 0:
             return
         notification = {"events": processed_events}
+        if self.query is not None:
+            notification["query"] = self.query
+        if self.hook_id is not None:
+            notification["hook_id"] = self.hook_id
         self.send_notification(notification)
 
     @retry(

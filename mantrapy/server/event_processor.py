@@ -20,7 +20,7 @@ from mantrapy.webhooks.modules.utils import (
 )
 
 
-def get_event_processor(webhook_url: str, query: str) -> Callable:
+def get_event_processor(hook_id: str, webhook_url: str, query: str) -> Callable:
     """Get an EventProcessor based on multiple query conditions."""
 
     # Split the query string by `&` to support multiple conditions
@@ -74,7 +74,10 @@ def get_event_processor(webhook_url: str, query: str) -> Callable:
             filtered_events = processor(filtered_events)
         return filtered_events
 
-    return EventProcessor(webhook_url, combined_processor).process_events
+    processor = EventProcessor(webhook_url, combined_processor)
+    processor.set_hook_id(hook_id)
+    processor.set_query(query)
+    return processor.process_events
 
 
 def extract_value(condition: str) -> str:
