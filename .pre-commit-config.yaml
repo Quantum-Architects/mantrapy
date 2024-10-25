@@ -1,3 +1,4 @@
+exclude: "mantrapy/proto"
 repos:
   - repo: https://github.com/PyCQA/flake8
     rev: 7.1.1
