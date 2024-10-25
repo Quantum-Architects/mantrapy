@@ -142,3 +142,15 @@ async def get_webhooks():
     # TODO get data from DB NOT from cache
     hook_ids = list(registered_hooks_cache.keys())
     return {"hooks": hook_ids}
+
+
+@app.get("/webhooks/{hook_id}")
+async def get_webhook(hook_id: str):
+    """Get webhook by ID."""
+    # with SessionLocal() as db:
+    #     webhook = db.query(Webhook).filter(Webhook.id == hook_id).first()
+    #     if not webhook:
+    #         raise HTTPException(status_code=404, detail="Webhook not found")
+
+    # TODO get data from DB NOT from cache
+    return {"hook": "TODO, get hook from DB"}
