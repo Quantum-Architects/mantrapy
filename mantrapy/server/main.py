@@ -30,22 +30,36 @@ registered_hooks_cache = {}
 async def process_events():
     """Listen for events from the ChainClient and post to registered webhooks."""
     async for ws_event in chain_client.subscribe("tm.event='Tx'"):
-        # Decode the incoming message if it's JSON
-        try:
-            if isinstance(ws_event, str):
-                ws_event = json.loads(ws_event)
-            if "events" in ws_event.get(
-                "result", {}
-            ) and "message.msg_index" in ws_event["result"].get("events", {}):
-                events = ws_event["result"]["data"]["value"]["TxResult"]["result"][
-                    "events"
-                ]
-                # Iterate through the cached hooks and post the event data
-                for _, process_fn in registered_hooks_cache.items():
-                    process_fn(events)
-        except (json.JSONDecodeError, KeyError) as e:
-            print(f"Error parsing event data: {e}")
-            print("Raw event data:", ws_event)
+        while True:
+            try:
+                async for ws_event in chain_client.subscribe("tm.event='Tx'"):
+                    try:
+                        # Decode the incoming message if it's JSON
+                        if isinstance(ws_event, str):
+                            ws_event = json.loads(ws_event)
+                        if "events" in ws_event.get(
+                            "result", {}
+                        ) and "message.msg_index" in ws_event["result"].get(
+                            "events", {}
+                        ):
+                            events = ws_event["result"]["data"]["value"]["TxResult"][
+                                "result"
+                            ]["events"]
+
+                            # Iterate through the cached hooks and post the event data
+                            for _, process_fn in registered_hooks_cache.items():
+                                process_fn(events)
+
+                    except (json.JSONDecodeError, KeyError) as e:
+                        print(f"Error parsing event data: {e}")
+                        print("Raw event data:", ws_event)
+
+            except ConnectionError as conn_err:
+                print(f"Connection error: {conn_err}. Retrying...")
+                await asyncio.sleep(2)  # Backoff before retrying
+            except Exception as e:
+                print(f"Unexpected error in process_events: {e}")
+                await asyncio.sleep(2)
 
 
 @asynccontextmanager
