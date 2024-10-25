@@ -1,2 +1,8 @@
-import mantraproto.cosmos.tx.v1beta1.tx_pb2 as asd
-print(asd)
+# from mantrapy.txbuilder.builder import tx_builder
+from mantrapy.wallet.wallet import new_wallet
+
+# t = tx_builder("")
+# t.bank_send("",1,"")
+w = new_wallet()
+print(w)
+

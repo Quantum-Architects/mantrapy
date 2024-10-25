@@ -11,4 +11,4 @@ A Python library to interact with the Mantra chain
 - CHAIN_ID defaults to 'mantra-1'
 - DENOM defaults to 'uom'
 
-When using the `Constants` file, you can call Constants.testnet() to use the Testnet defaults.
+When using the `Constants` file, you can call `Constants.testnet()` to use the Testnet defaults.
