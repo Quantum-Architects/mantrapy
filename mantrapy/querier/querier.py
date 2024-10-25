@@ -14,8 +14,8 @@ Querier defines a type to perform queries against the Mantra chain.
 """
 
 TIMEOUT = 1
-API = 'https://api.mantrachain.io'
-RPC = 'https://rpc.mantrachain.io'
+API = 'https://api.dukong.mantrachain.io'
+RPC = 'https://rpc.dukong.mantrachain.io'
 
 QUERY_PATHS = {
     'account': '/cosmos/auth/v1beta1/accounts/{address}',
