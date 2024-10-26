@@ -12,17 +12,13 @@ from mantrapy.types.cosmossdk.types import QueryResponse
 # TODO: should be moved to a config.
 TIMEOUT = 10
 MAX_RETRIES = 3
-RETRY_DELAY = 1
-
-API = "https://api.mantrachain.io"
-RPC = "https://rpc.mantrachain.io"
 
 QUERY_PATHS = {
     "account": "/cosmos/auth/v1beta1/accounts/{address}",
     "balances": "/cosmos/bank/v1beta1/balances/{address}",
     "status": "/status",
-    "block_by_hash": "/block?hash={hash}",
     "block": "/block?height={height}",
+    "block_by_hash": "/block_by_hash?hash={hash}",
     "tx": "/tx?hash={hash}",
     "delegator_delegations": "/cosmos/staking/v1beta1/delegations/{delegator_address}",
     "delegation_total_rewards": "/cosmos/distribution/v1beta1/delegators/{delegator_address}/rewards",
@@ -42,7 +38,6 @@ class Client:
         rpc: str,
         timeout: int = TIMEOUT,
         max_retries: int = MAX_RETRIES,
-        retry_delay: int = RETRY_DELAY,
     ) -> None:
         """
         Initialize the class with base API and RPC URLs.
@@ -55,7 +50,6 @@ class Client:
         # Requests parameters.
         self.timeout = timeout
         self.max_retries = max_retries
-        self.retry_delay = retry_delay
 
     def create_api_url(self, path: str) -> str:
         """
@@ -302,7 +296,7 @@ class Client:
                 status_code=sync_info_resp.status_code,
             )
 
-    def get_block_by_height(self, height: str) -> QueryResponse[ResultBlock]:
+    def get_block_by_height(self, height: int) -> QueryResponse[ResultBlock]:
         """
         Query a block associated with a particular height.
         """
