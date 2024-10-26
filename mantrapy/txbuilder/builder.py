@@ -19,7 +19,7 @@ class TxBuilder:
         self.wallet = wallet
         self.constants = Constants()
         if is_testnet:
-            self.constants.testnet()
+            self.constant = self.constants.testnet()
         self.client = Client(self.constants.api_endpoint, self.constants.rpc_endpoint)
         self.update_account_info()
 
@@ -36,7 +36,9 @@ class TxBuilder:
 
     def prepare_tx(self, body, auth_info, signature) -> str:
         txraw = create_tx_raw(
-            body.SerializeToString(), auth_info.SerializeToString(), signature
+            body.SerializeToString(),
+            auth_info.SerializeToString(),
+            signature,
         )
         txbytes = txraw.SerializeToString()
         return base64.b64encode(txbytes).decode("utf-8")
@@ -48,7 +50,7 @@ class TxBuilder:
             "mode": "BROADCAST_MODE_SYNC",
         }
 
-        self.client.broadcast(tx_to_broadcast)
+        return self.client.broadcast(tx_to_broadcast)
 
     def broadcast_bytes(self, tx_bytes):
         tx_to_broadcast = {
@@ -72,10 +74,19 @@ class TxBuilder:
         msg = generate_bank_send_msg(self.wallet.address, dst, str(amount), denom)
 
         body, auth_info = create_tx_template(
-            msg, "", fee, self.constants.denom, gas, self.pubkey, int(self.sequence)
+            msg,
+            "",
+            fee,
+            self.constants.denom,
+            gas,
+            self.pubkey,
+            int(self.sequence),
         )
         sign_doc = create_sig_doc(
-            body, auth_info, self.constants.chain_id, int(self.account_number)
+            body,
+            auth_info,
+            self.constants.chain_id,
+            int(self.account_number),
         )
 
         return body, auth_info, sign_doc

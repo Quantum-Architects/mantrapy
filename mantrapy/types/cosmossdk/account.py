@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import TypeVar
+from typing import Optional, TypeVar
 
 T = TypeVar("T")
 
@@ -29,14 +29,19 @@ class Account:
 
     _type: str
     address: str
-    pub_key: PubKey
+    pub_key: Optional[PubKey]
     account_number: str
     sequence: str
 
     @classmethod
     def from_dict(cls, data: dict) -> "Account":
         account_data = data["account"]
-        pub_key = PubKey.from_dict(account_data["pub_key"])
+        try:
+            pub_key = PubKey.from_dict(account_data["pub_key"])
+
+        except TypeError as e:
+            pub_key = None
+
         return cls(
             _type=account_data["@type"],
             address=account_data["address"],
