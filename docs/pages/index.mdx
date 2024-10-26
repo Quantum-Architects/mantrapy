@@ -1,12 +1,17 @@
 ---
 layout: landing
+showLogo: false
+content: 
+  horizontalPadding: 500px
+  width: 100%
+  verticalPadding: 100px
 ---
 
 import { HomePage } from "vocs/components";
 import { Callout } from "vocs/components";
 
 <HomePage.Root>
-  <HomePage.Logo />
+  <HomePage.Logo  width={250} height={250}/>
   <HomePage.Tagline>
     Python library to interact with the Mantra chain
   </HomePage.Tagline>
@@ -15,6 +20,8 @@ import { Callout } from "vocs/components";
     pip install mantrapy
     ```
 
+  <HomePage.Description>Mantrapy is a Python library helping developers and users
+  to interact with Mantra chain, easily customizable and extensible.</HomePage.Description>
   <HomePage.Buttons>
     <HomePage.Button href="/getting-started" variant="accent">
       Get started

@@ -14,6 +14,12 @@ export default defineConfig({
     google: 'FT Sterling',
   },
   title: "mantra-py",
+  socials: [
+    {
+      icon: 'github',
+      link: 'https://github.com/Quantum-Architects',
+    },
+  ],
   sidebar: [
     {
       text: "Getting Started",
