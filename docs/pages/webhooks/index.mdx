@@ -59,13 +59,14 @@ asyncio.run(main())
 
 #### Methods
 
-- `set_query(query)`: Sets a query to include in notifications.
+- `set_query(query)`: Sets a query field in the notifications posted to the webhook url.
   - **Parameters**:
     - `query` (str): The event query string.
-- `set_hook_id(hook_id)`: Sets a unique hook identifier.
+- `set_hook_id(hook_id)`: Sets a unique hook identifier that is included in the notifications posted to the webhook url.
   - **Parameters**:
     - `hook_id` (str): Identifier for the hook.
 - `process_events(events)`: Processes events and sends the result via a `POST` HTTP request to the webhook URL.
+  The results are sent in the body of the request as a JSON object with fields `events` (list), `hook_id` (str - optional) and `query` (str - optional).
   - **Parameters:**
     - `events` (list): List of events to process.
   - **_Raises_**: requests.exceptions.RequestException
@@ -81,11 +82,40 @@ def process_event_fn(events):
 
 processor = EventProcessor("https://webhook.example.com", process_event_fn)
 processor.set_hook_id("hook_123")
+processor.set_query("my-custom-query")
 
 # Process a batch of events
 # Usually this comes from the subscription of a ChainClient
 events = [{'type': 'message', 'attributes': [{'key': 'action', 'value': '/cosmos.bank.v1beta1.MsgSend', 'index': True}, {'key': 'sender', 'value': 'mantra1nagtgts4y4s3d08ykqe0vsd68l53gnlujms9zj', 'index': True}, {'key': 'module', 'value': 'bank', 'index': True}, {'key': 'msg_index', 'value': '0', 'index': True}]}]
 processor.process_events(events)
+```
+
+In this example, the webhook will send a `POST` request to the `https://webhook.example.com` URL with the following body:
+
+```json
+{
+  "events": [
+    {
+      "type": "message",
+      "data": [
+        {
+          "key": "action",
+          "value": "/cosmos.bank.v1beta1.MsgSend",
+          "index": true
+        },
+        {
+          "key": "sender",
+          "value": "mantra1nagtgts4y4s3d08ykqe0vsd68l53gnlujms9zj",
+          "index": true
+        },
+        { "key": "module", "value": "bank", "index": true },
+        { "key": "msg_index", "value": "0", "index": true }
+      ]
+    }
+  ],
+  "query": "my-custom-query",
+  "hook_id": "hook_123"
+}
 ```
 
 ### Webhook
