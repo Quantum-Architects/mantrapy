@@ -1,10 +1,8 @@
 import requests
-from tenacity import (
-    retry,
-    stop_after_attempt,
-    wait_exponential,
-    retry_if_exception_type,
-)
+from tenacity import retry
+from tenacity import retry_if_exception_type
+from tenacity import stop_after_attempt
+from tenacity import wait_exponential
 
 
 class EventProcessor:
@@ -29,11 +27,11 @@ class EventProcessor:
         processed_events = self.process_fn(events)
         if len(processed_events) == 0:
             return
-        notification = {"events": processed_events}
+        notification = {'events': processed_events}
         if self.query is not None:
-            notification["query"] = self.query
+            notification['query'] = self.query
         if self.hook_id is not None:
-            notification["hook_id"] = self.hook_id
+            notification['hook_id'] = self.hook_id
         self.send_notification_with_retry(notification)
 
     @retry(

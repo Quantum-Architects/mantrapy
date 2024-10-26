@@ -1,9 +1,9 @@
+import hashlib
+from binascii import unhexlify
 from hashlib import sha256
 
 import bech32
-from binascii import unhexlify
 import ecdsa
-import hashlib
 
 from mantrapy.wallet.hashing import ripemd160
 from mantrapy.wallet.utils import new_hdwallet_from_mnemonic
@@ -21,10 +21,9 @@ class Wallet:
     def sign_document(self, doc: bytes) -> bytes:
         privkey = ecdsa.SigningKey.from_string(unhexlify(self.privkey), curve=ecdsa.SECP256k1)
         signature_compact = privkey.sign_deterministic(
-            doc, hashfunc=hashlib.sha256, sigencode=ecdsa.util.sigencode_string_canonize
+            doc, hashfunc=hashlib.sha256, sigencode=ecdsa.util.sigencode_string_canonize,
         )
         return signature_compact
-
 
 
 def random_wallet() -> Wallet:

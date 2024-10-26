@@ -6,7 +6,7 @@ w = wallet_from_mnemonic(TEST_MNEMONIC)
 
 builder = TxBuilder(w, is_testnet=True)
 
-body,auth,sign_doc = builder.bank_send("mantra1wf2eqtltm35tc5dllhp9uuzy66qvuwhve7zzgr", 1, "uom")
+body, auth, sign_doc = builder.bank_send('mantra1wf2eqtltm35tc5dllhp9uuzy66qvuwhve7zzgr', 1, 'uom')
 resp = builder.broadcast_tx(body, auth, builder.sign_message(sign_doc))
 
 print(resp)
