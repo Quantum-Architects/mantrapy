@@ -1,9 +1,12 @@
 import requests
 
-from mantrapy.types.cometbft.block import Block, BlockID, ResultBlock
+from mantrapy.types.cometbft.block import Block
+from mantrapy.types.cometbft.block import BlockID
+from mantrapy.types.cometbft.block import ResultBlock
 from mantrapy.types.cometbft.consensus import SyncInfo
 from mantrapy.types.cometbft.tx import ResultTx
-from mantrapy.types.cosmossdk.account import Account, QueryAccountResponse
+from mantrapy.types.cosmossdk.account import Account
+from mantrapy.types.cosmossdk.account import QueryAccountResponse
 from mantrapy.types.cosmossdk.bank import QueryBalancesResponse
 from mantrapy.types.cosmossdk.distribution import QueryDelegationTotalRewardsResponse
 from mantrapy.types.cosmossdk.staking import QueryDelegatorDelegationsResponse
@@ -14,17 +17,17 @@ TIMEOUT = 10
 MAX_RETRIES = 3
 
 QUERY_PATHS = {
-    "account": "/cosmos/auth/v1beta1/accounts/{address}",
-    "balances": "/cosmos/bank/v1beta1/balances/{address}",
-    "status": "/status",
-    "block": "/block?height={height}",
-    "block_by_hash": "/block_by_hash?hash={hash}",
-    "tx": "/tx?hash={hash}",
-    "delegator_delegations": "/cosmos/staking/v1beta1/delegations/{delegator_address}",
-    "delegation_total_rewards": "/cosmos/distribution/v1beta1/delegators/{delegator_address}/rewards",
+    'account': '/cosmos/auth/v1beta1/accounts/{address}',
+    'balances': '/cosmos/bank/v1beta1/balances/{address}',
+    'status': '/status',
+    'block': '/block?height={height}',
+    'block_by_hash': '/block_by_hash?hash={hash}',
+    'tx': '/tx?hash={hash}',
+    'delegator_delegations': '/cosmos/staking/v1beta1/delegations/{delegator_address}',
+    'delegation_total_rewards': '/cosmos/distribution/v1beta1/delegators/{delegator_address}/rewards',
 }
 
-TX_PATHS = {"tx": "/cosmos/tx/v1beta1/txs"}
+TX_PATHS = {'tx': '/cosmos/tx/v1beta1/txs'}
 
 
 class Client:
@@ -40,9 +43,9 @@ class Client:
         max_retries: int = MAX_RETRIES,
     ) -> None:
         # Cosmos SDK endpoint.
-        self.api = api.rstrip("/")
+        self.api = api.rstrip('/')
         # CometBFT endpoint.
-        self.rpc = rpc.rstrip("/")
+        self.rpc = rpc.rstrip('/')
 
         # Requests parameters.
         self.timeout = timeout
@@ -61,7 +64,7 @@ class Client:
         return self.rpc + path
 
     def _make_request(
-        self, url: str, method: str = "GET", json: str = "", **kwargs
+        self, url: str, method: str = 'GET', json: str = '', **kwargs,
     ) -> QueryResponse:
         """
         Make HTTP request with retries and error handling.
@@ -118,7 +121,7 @@ class Client:
 
         except KeyError as e:
             return QueryResponse(
-                error=f"Invalid response format: {str(e)}",
+                error=f'Invalid response format: {str(e)}',
                 status_code=resp.status_code,
             )
 
@@ -142,7 +145,7 @@ class Client:
 
         except KeyError as e:
             return QueryResponse(
-                error=f"Invalid response format: {str(e)}",
+                error=f'Invalid response format: {str(e)}',
                 status_code=resp.status_code,
             )
 
@@ -175,12 +178,12 @@ class Client:
 
         except KeyError as e:
             return QueryResponse(
-                error=f"Invalid response format: {str(e)}",
+                error=f'Invalid response format: {str(e)}',
                 status_code=resp.status_code,
             )
 
     def get_delegation_total_rewards(
-        self, address: str
+        self, address: str,
     ) -> QueryResponse[QueryDelegationTotalRewardsResponse]:
         """ """
 
@@ -196,15 +199,15 @@ class Client:
         try:
 
             delegation_total_rewards = QueryDelegationTotalRewardsResponse.from_dict(
-                resp.data
+                resp.data,
             )
             return QueryResponse(
-                data=delegation_total_rewards, status_code=resp.status_code
+                data=delegation_total_rewards, status_code=resp.status_code,
             )
 
         except KeyError as e:
             return QueryResponse(
-                error=f"Invalid response format: {str(e)}",
+                error=f'Invalid response format: {str(e)}',
                 status_code=resp.status_code,
             )
 
@@ -216,7 +219,7 @@ class Client:
         )
         if resp.status_code == 200:
             return resp.json()
-        raise Exception("error broadcasting")
+        raise Exception('error broadcasting')
 
     # ---------------------------------------------------------------------------------------------
     # RPC
@@ -236,10 +239,10 @@ class Client:
             )
 
         except ValueError as e:
-            raise ValueError(f"Invalid data format: {e}")
+            raise ValueError(f'Invalid data format: {e}')
         except KeyError as e:
             return QueryResponse(
-                error=f"Invalid response format: {str(e)}",
+                error=f'Invalid response format: {str(e)}',
                 status_code=resp.status_code,
             )
 
@@ -250,7 +253,7 @@ class Client:
         sync_info_resp = self._get_sync_info()
 
         if not sync_info_resp.data:
-            raise Exception("Data returned by query is nil")
+            raise Exception('Data returned by query is nil')
 
         try:
             return QueryResponse(
@@ -259,7 +262,7 @@ class Client:
             )
         except KeyError as e:
             return QueryResponse(
-                error=f"Invalid response format: {str(e)}",
+                error=f'Invalid response format: {str(e)}',
                 status_code=sync_info_resp.status_code,
             )
 
@@ -270,7 +273,7 @@ class Client:
         sync_info_resp = self._get_sync_info()
 
         if not sync_info_resp.data:
-            raise Exception("Data returned by query is nil")
+            raise Exception('Data returned by query is nil')
 
         try:
             return QueryResponse(
@@ -279,7 +282,7 @@ class Client:
             )
         except KeyError as e:
             return QueryResponse(
-                error=f"Invalid response format: {str(e)}",
+                error=f'Invalid response format: {str(e)}',
                 status_code=sync_info_resp.status_code,
             )
 
@@ -294,11 +297,11 @@ class Client:
             return resp
 
         if not resp.data:
-            raise Exception("Data returned by query is nil")
+            raise Exception('Data returned by query is nil')
 
         try:
-            block = Block.from_dict(resp.data["result"]["block"])
-            block_id = BlockID.from_dict(resp.data["result"]["block_id"])
+            block = Block.from_dict(resp.data['result']['block'])
+            block_id = BlockID.from_dict(resp.data['result']['block_id'])
 
             return QueryResponse(
                 data=ResultBlock(
@@ -310,7 +313,7 @@ class Client:
 
         except KeyError as e:
             return QueryResponse(
-                error=f"Invalid response format: {str(e)}",
+                error=f'Invalid response format: {str(e)}',
                 status_code=resp.status_code,
             )
 
@@ -326,8 +329,8 @@ class Client:
             return resp
 
         try:
-            block = Block.from_dict(resp.data["result"]["block"])
-            block_id = BlockID.from_dict(resp.data["result"]["block_id"])
+            block = Block.from_dict(resp.data['result']['block'])
+            block_id = BlockID.from_dict(resp.data['result']['block_id'])
 
             return QueryResponse(
                 data=ResultBlock(
@@ -339,7 +342,7 @@ class Client:
 
         except KeyError as e:
             return QueryResponse(
-                error=f"Invalid response format: {str(e)}",
+                error=f'Invalid response format: {str(e)}',
                 status_code=resp.status_code,
             )
 
@@ -356,12 +359,12 @@ class Client:
 
         try:
             return QueryResponse(
-                data=ResultTx.from_dict(resp.data["result"]),
+                data=ResultTx.from_dict(resp.data['result']),
                 status_code=resp.status_code,
             )
 
         except KeyError as e:
             return QueryResponse(
-                error=f"Invalid response format: {str(e)}",
+                error=f'Invalid response format: {str(e)}',
                 status_code=resp.status_code,
             )

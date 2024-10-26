@@ -9,6 +9,6 @@ height_resp = client.get_block_by_height(392617)
 print(height_resp.data)
 
 height_resp = client.get_block_by_hash(
-    "0x744B0E582780B790B739E81FF79E5F19E4200CF86E8302969CC1C898C798EC4B"
+    '0x744B0E582780B790B739E81FF79E5F19E4200CF86E8302969CC1C898C798EC4B',
 )
 print(height_resp.data)
