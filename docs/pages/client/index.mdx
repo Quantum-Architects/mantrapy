@@ -1,1 +1,129 @@
 # Client
+
+Mantrapy includes a client to interact with the Mantra network via:
+
+- **API**: to execute queries or transaction against the application.
+- **RPC**: to execute queries or transactions against Comet BFT.
+
+## Mantra client
+
+### Instantiate the client
+```py
+client = Client(api_endpoint, rpc_endpoint, timeout, max_retries)
+```
+
+Where it possible to specify API and RPC endpoints for testnet or mainnet, the
+timeout of each request, and the number of retries if a request fails.
+
+### Query
+
+All queries performed via the mantrapy client return a `QueryResponse` type
+which wrap the returned data, the response status, and the possible error.
+
+#### Account
+
+It is possible to query the account information associated with an address:
+```py
+get_account(address: str) -> QueryResponse[QueryAccountResponse]:
+```
+
+#### Balances
+
+It is possible to get all balances of an account via:
+
+```py
+get_balances(address: str) -> QueryResponse[QueryBalancesResponse]:
+```
+
+#### Delegations
+
+It is possible to get all delegations of an account via:
+
+```py
+get_delegator_delegations(address: str) -> QueryResponse[QueryDelegatorDelegationsResponse]:
+```
+
+#### Staking rewards
+
+It is possible to retrieve all rewards accrued by an account via:
+
+```py
+get_delegation_total_rewards(address: str) -> QueryResponse[QueryDelegationTotalRewardsResponse]:
+```
+
+#### Latest block height
+
+It is possible to retrieve the last block height:
+
+```py
+get_height() -> QueryResponse[str]:
+```
+#### Latest block hash
+
+It is possible to retrieve the last block hash:
+
+```py
+get_last_hash() -> QueryResponse[str]:
+```
+
+#### Block
+
+It is possible to retrieve a block's information using the height:
+
+```py
+get_block_by_height(height: int) -> QueryResponse[ResultBlock]:
+```
+
+Or via its hash:
+
+```py
+get_block_by_hash(hash: str) -> QueryResponse[ResultBlock]:
+```
+
+#### Trasnsaction
+
+It is possible to query a transaction given its hash value:
+
+```py
+get_tx_by_hash(hash: str) -> QueryResponse[ResultTx]:
+```
+
+### Transactions
+
+#### Broadcasting a transaction
+
+The mantrapy client can be used to broadcast any signed transaction via:
+
+```py
+broadcast(tx) -> str:
+```
+
+Please, refer to the transaction builder documentation to understand how to
+create a signed transaction.
+
+## Examples
+
+### Execute a query
+
+To execute a query, you first have to instantiate the Client as described in the
+previous section, and then call the method you want to execute as in the example
+below:
+
+```py
+from mantrapy.client.client import Client
+from mantrapy.constants.constants import Constants
+
+constants = Constants()
+client = Client(constants.api_endpoint, constants.rpc_endpoint)
+block_resp = client.get_block_by_height(1)
+# Status of the request
+print(block_resp.status_code)
+# Content of the request
+print(block_resp.data)
+```
+
+Where the `Constant` class contains the endpoints for both mainnet and testnet.
+
+You can find more query examples in the `./examples/queries/` folder.
+
+
