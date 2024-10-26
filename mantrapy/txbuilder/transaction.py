@@ -18,9 +18,11 @@ def create_body_bytes(msg: Message, memo: str):
     any.Pack(msg, type_url_prefix='/')
     return TxBody(messages=[any], memo=memo)
 
+
 def create_fee(fee_amount: str, fee_denom: str, gas_limit: str):
     coin = Coin(denom=fee_denom, amount=fee_amount)
     return Fee(gas_limit=int(gas_limit), amount=[coin])
+
 
 def create_signer_info(public_key_bytes: bytes, sequence: int):
     public_key = Any()
@@ -31,8 +33,10 @@ def create_signer_info(public_key_bytes: bytes, sequence: int):
         sequence=sequence,
     )
 
+
 def create_auth_info_bytes(signer_info: SignerInfo, fee: Fee):
     return AuthInfo(signer_infos=[signer_info], fee=fee)
+
 
 def create_sig_doc(
     body: TxBody,
@@ -62,6 +66,7 @@ def create_tx_template(
         create_fee(fee_amount, fee_denom, gas_limit),
     )
 
+
 def create_tx_raw(body_bytes, auth_info, signature):
-    tx = TxRaw(body_bytes = body_bytes, auth_info_bytes = auth_info, signatures=[signature])
+    tx = TxRaw(body_bytes=body_bytes, auth_info_bytes=auth_info, signatures=[signature])
     return tx

@@ -9,7 +9,7 @@ def get_bank_events(events):
 
 
 def get_bank_events_for_addr(addr, events):
-    _=addr
+    _ = addr
     return _get_module_events('bank', events)
 
 

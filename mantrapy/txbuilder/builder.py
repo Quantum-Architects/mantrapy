@@ -10,9 +10,10 @@ from mantrapy.txbuilder.transaction import create_tx_raw
 from mantrapy.txbuilder.transaction import create_tx_template
 from mantrapy.wallet.wallet import Wallet
 
+
 class TxBuilder:
 
-    def __init__(self, wallet:Wallet, is_testnet: bool = False) -> None:
+    def __init__(self, wallet: Wallet, is_testnet: bool = False) -> None:
         self.wallet = wallet
         self.constants = Constants()
         if is_testnet:
@@ -22,11 +23,11 @@ class TxBuilder:
 
     def update_account_info(self):
         acc = self.client.get_account(self.wallet.address)
-        self.pubkey =  base64.b64decode(acc.data.account.pub_key.key)
+        self.pubkey = base64.b64decode(acc.data.account.pub_key.key)
         self.account_number = acc.data.account.account_number
         self.sequence = acc.data.account.sequence
 
-    def sign_message(self, sign_doc) ->bytes:
+    def sign_message(self, sign_doc) -> bytes:
         return self.wallet.sign_document(sign_doc)
 
     def prepare_tx(self, body, auth_info, signature) -> str:
@@ -41,7 +42,7 @@ class TxBuilder:
             'mode': 'BROADCAST_MODE_SYNC',
         }
 
-        resp = requests.post(url=self.constants.api_endpoint+'/cosmos/tx/v1beta1/txs',json=tx_to_broadcast)
+        resp = requests.post(url=self.constants.api_endpoint+'/cosmos/tx/v1beta1/txs', json=tx_to_broadcast)
         if resp.status_code == 200:
             return resp.json()
         raise Exception('error broadcasting')
@@ -52,7 +53,7 @@ class TxBuilder:
             'mode': 'BROADCAST_MODE_SYNC',
         }
 
-        resp = requests.post(url=self.constants.api_endpoint+'/cosmos/tx/v1beta1/txs',json=tx_to_broadcast)
+        resp = requests.post(url=self.constants.api_endpoint+'/cosmos/tx/v1beta1/txs', json=tx_to_broadcast)
         if resp.status_code == 200:
             return resp.json()
         raise Exception('error broadcasting')
@@ -64,7 +65,7 @@ class TxBuilder:
 
         msg = generate_bank_send_msg(self.wallet.address, dst, str(amount), denom)
 
-        body, auth_info = create_tx_template(msg,'', fee,self.constants.denom, gas, self.pubkey, int(self.sequence))
-        sign_doc = create_sig_doc(body,auth_info,self.constants.chain_id,int(self.account_number))
+        body, auth_info = create_tx_template(msg, '', fee, self.constants.denom, gas, self.pubkey, int(self.sequence))
+        sign_doc = create_sig_doc(body, auth_info, self.constants.chain_id, int(self.account_number))
 
         return body, auth_info, sign_doc

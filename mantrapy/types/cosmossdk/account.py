@@ -1,8 +1,5 @@
 from dataclasses import dataclass
-from typing import Generic
-from typing import Optional
 from typing import TypeVar
-from typing import Union
 
 T = TypeVar('T')
 

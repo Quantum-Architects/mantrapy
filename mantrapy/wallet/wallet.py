@@ -26,7 +26,6 @@ class Wallet:
         return signature_compact
 
 
-
 def random_wallet() -> Wallet:
     return wallet_from_mnemonic(new_mnemonic())
 
