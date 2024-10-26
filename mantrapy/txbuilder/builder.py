@@ -48,7 +48,7 @@ class TxBuilder:
             "mode": "BROADCAST_MODE_SYNC",
         }
 
-        self.client.broadcast(tx_to_broadcast)
+        return self.client.broadcast(tx_to_broadcast)
 
     def broadcast_bytes(self, tx_bytes):
         tx_to_broadcast = {
