@@ -25,7 +25,9 @@ class TxBuilder:
 
     def update_account_info(self):
         acc = self.client.get_account(self.wallet.address)
-        self.pubkey = base64.b64decode(acc.data.account.pub_key.key)
+        self.pubkey = base64.b64decode(self.wallet.pubkey)
+        if acc.data is None:
+            raise Exception("invalid account response")
         self.account_number = acc.data.account.account_number
         self.sequence = acc.data.account.sequence
 
@@ -63,7 +65,7 @@ class TxBuilder:
         raise Exception("error broadcasting")
 
     # Messages
-    def bank_send(self, dst: str, amount: int, denom: str) -> str:
+    def bank_send(self, dst: str, amount: int, denom: str):
         fee = "3257"
         gas = "271402"
 

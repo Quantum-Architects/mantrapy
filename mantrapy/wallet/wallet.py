@@ -1,3 +1,4 @@
+import base64
 import hashlib
 from binascii import unhexlify
 from hashlib import sha256
@@ -17,6 +18,7 @@ class Wallet:
         self.mnemonic = ''
         self.privkey = ''
         self.address = ''
+        self.pubkey = ''
 
     def sign_document(self, doc: bytes) -> bytes:
         privkey = ecdsa.SigningKey.from_string(unhexlify(self.privkey), curve=ecdsa.SECP256k1)
@@ -36,6 +38,7 @@ def wallet_from_mnemonic(mnemonic: str) -> Wallet:
     generator = new_hdwallet_from_mnemonic(w.mnemonic)
     w.privkey = generator.private_key()
     compressed_public_key = privkey_to_pubkey(w.privkey)
+    w.pubkey= base64.b64encode(compressed_public_key).decode("utf-8")
     public_key_hash = ripemd160(sha256(compressed_public_key).digest())
     five_bit_r = bech32.convertbits(public_key_hash, 8, 5)
     if five_bit_r is not None:
