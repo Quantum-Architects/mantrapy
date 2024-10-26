@@ -16,12 +16,12 @@ class Delegation:
     shares: int
 
     @classmethod
-    def from_dict(cls, data: dict) -> 'Delegation':
+    def from_dict(cls, data: dict) -> "Delegation":
 
         return cls(
-            delegator_address=data['delegator_address'],
-            validator_address=data['validator_address'],
-            shares=data['shares'],
+            delegator_address=data["delegator_address"],
+            validator_address=data["validator_address"],
+            shares=data["shares"],
         )
 
 
@@ -35,11 +35,11 @@ class DelegationResponse:
     balance: Coin
 
     @classmethod
-    def from_dict(cls, data: dict) -> 'DelegationResponse':
+    def from_dict(cls, data: dict) -> "DelegationResponse":
 
         return cls(
-            delegation=Delegation.from_dict(data['delegation']),
-            balance=Coin.from_dict(data['balance']),
+            delegation=Delegation.from_dict(data["delegation"]),
+            balance=Coin.from_dict(data["balance"]),
         )
 
 
@@ -60,14 +60,14 @@ class QueryDelegatorDelegationsResponse:
     pagination: PageResponse
 
     @classmethod
-    def from_dict(cls, data: dict) -> 'QueryDelegatorDelegationsResponse':
+    def from_dict(cls, data: dict) -> "QueryDelegatorDelegationsResponse":
         delegation_responses = DelegationResponses(
             [
                 DelegationResponse.from_dict(delegation)
-                for delegation in data['delegation_responses']
+                for delegation in data["delegation_responses"]
             ],
         )
         return cls(
             delegation_responses=delegation_responses,
-            pagination=data['pagination'],
+            pagination=data["pagination"],
         )

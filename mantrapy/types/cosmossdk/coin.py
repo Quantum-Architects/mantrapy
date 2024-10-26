@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import List
+from typing import list
 
 
 @dataclass
@@ -12,10 +12,10 @@ class Coin:
     amount: str
 
     @classmethod
-    def from_dict(cls, data: dict) -> 'Coin':
+    def from_dict(cls, data: dict) -> "Coin":
         return cls(
-            denom=data['denom'],
-            amount=data['amount'],
+            denom=data["denom"],
+            amount=data["amount"],
         )
 
 
