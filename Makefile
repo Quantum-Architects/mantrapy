@@ -10,4 +10,3 @@ dev-docs:
 
 build-docs:
 	@source /opt/homebrew/opt/nvm/nvm.sh && nvm use && npm run build
-

@@ -12,13 +12,13 @@ class Header:
     app_hash: str
 
     @classmethod
-    def from_dict(cls, data: dict) -> "Header":
+    def from_dict(cls, data: dict) -> 'Header':
 
         return cls(
-            chain_id=data["chain_id"],
-            height=data["height"],
-            time=data["time"],
-            app_hash=data["app_hash"],
+            chain_id=data['chain_id'],
+            height=data['height'],
+            time=data['time'],
+            app_hash=data['app_hash'],
         )
 
 
@@ -28,9 +28,9 @@ class Data:
     hash: list
 
     @classmethod
-    def from_dict(cls, data: dict) -> "Data":
+    def from_dict(cls, data: dict) -> 'Data':
 
-        txs = list(data["txs"])
+        txs = list(data['txs'])
         _hash = [sha256(base64.b64decode(tx)).hexdigest() for tx in txs]
 
         return cls(
@@ -46,10 +46,10 @@ class Block:
     data: Data
 
     @classmethod
-    def from_dict(cls, d: dict) -> "Block":
+    def from_dict(cls, d: dict) -> 'Block':
 
-        header = Header.from_dict(d["header"])
-        data = Data.from_dict(d["data"])
+        header = Header.from_dict(d['header'])
+        data = Data.from_dict(d['data'])
 
         return cls(
             header=header,
@@ -63,9 +63,9 @@ class BlockID:
     hash: str
 
     @classmethod
-    def from_dict(cls, data: dict) -> "BlockID":
+    def from_dict(cls, data: dict) -> 'BlockID':
 
-        return cls(hash=data["hash"])
+        return cls(hash=data['hash'])
 
 
 @dataclass
