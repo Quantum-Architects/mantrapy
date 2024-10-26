@@ -49,7 +49,7 @@ export default defineConfig({
       items: [
         {
           text: "Webhooks API",
-          link: "/webhooks-api",
+          link: "/examples/webhooks-api",
         },
       ],
     },
