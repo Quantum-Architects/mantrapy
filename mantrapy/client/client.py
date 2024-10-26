@@ -5,6 +5,7 @@ from mantrapy.types.cometbft.consensus import SyncInfo
 from mantrapy.types.cometbft.tx import ResultTx
 from mantrapy.types.cosmossdk.account import Account, QueryAccountResponse
 from mantrapy.types.cosmossdk.bank import QueryAllBalancesResponse
+from mantrapy.types.cosmossdk.distribution import QueryDelegationTotalRewardsResponse
 from mantrapy.types.cosmossdk.staking import QueryDelegatorDelegationsResponse
 from mantrapy.types.cosmossdk.types import QueryResponse
 
@@ -23,7 +24,8 @@ QUERY_PATHS = {
     "block_by_hash": "block?hash={hash}",
     "block": "block?height={height}",
     "tx": "/tx?hash={hash}",
-    "delegator_delegations": "/cosmos/staking/v1beta1/delegations/{delegator_addr}",
+    "delegator_delegations": "/cosmos/staking/v1beta1/delegations/{delegator_address}",
+    "delegation_total_rewards": "/cosmos/distribution/v1beta1/delegators/{delegator_address}/rewards",
 }
 
 
@@ -159,7 +161,7 @@ class Client:
         """
 
         url = self.create_api_url(
-            QUERY_PATHS["delegator_delegations"].format(delegator_addr=address)
+            QUERY_PATHS["delegator_delegations"].format(delegator_address=address)
         )
         resp = self._make_request(url)
 
@@ -176,6 +178,37 @@ class Client:
             )
             return QueryResponse(
                 data=delegator_delegations, status_code=resp.status_code
+            )
+
+        except KeyError as e:
+            return QueryResponse(
+                error=f"Invalid response format: {str(e)}",
+                status_code=resp.status_code,
+            )
+
+    def get_delegation_total_rewards(
+        self, address: str
+    ) -> QueryResponse[QueryDelegationTotalRewardsResponse]:
+        """ """
+
+        url = self.create_api_url(
+            QUERY_PATHS["delegation_total_rewards"].format(delegator_address=address)
+        )
+        resp = self._make_request(url)
+
+        if not resp.is_success():
+            return resp
+
+        if not resp.data:
+            raise Exception("Data returned by query is nil")
+
+        try:
+
+            delegation_total_rewards = QueryDelegationTotalRewardsResponse.from_dict(
+                resp.data
+            )
+            return QueryResponse(
+                data=delegation_total_rewards, status_code=resp.status_code
             )
 
         except KeyError as e:
