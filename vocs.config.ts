@@ -27,6 +27,10 @@ export default defineConfig({
           text: "Webhooks",
           link: "/webhooks",
         },
+        {
+          text: "Constants",
+          link: "/constants",
+        },
       ],
     },
     {

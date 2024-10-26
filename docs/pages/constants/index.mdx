@@ -1,0 +1,27 @@
+# Constants
+
+The `constants` pkg is used to read from the environment variable the chain values.
+
+## Env Vars
+
+- 'API_ENDPOINT'
+- 'RPC_ENDPOINT'
+- 'CHAIN_ID'
+- 'DENOM', the denomination is used to pay the network fees.
+
+## Default Values
+
+If the env vars are not set, the `constants` object will default to Mantra Mainnet.
+
+Calling the `constants.testnet()` function will overwrite the values with the Testnet configuration.
+
+## Usage
+
+```py
+from mantrapy.constants.constants import Constants
+
+c = Constants()
+c.testnet()
+print(c.api_endpoint)
+print(c.rpc)
+```
