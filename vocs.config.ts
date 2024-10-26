@@ -1,63 +1,63 @@
 import { defineConfig } from "vocs";
 
 export default defineConfig({
-  basePath: "/mantrapy",
-  iconUrl: {
-    light: "/Icon-gradient.svg",
-    dark: "/Icon-white.svg",
-  },
-  logoUrl: {
-    light: "/logo-black.svg",
-    dark: "/logo-gradient.svg",
-  },
-  font: {
-    google: 'FT Sterling',
-  },
-  title: "mantra-py",
-  socials: [
-    {
-      icon: 'github',
-      link: 'https://github.com/Quantum-Architects',
+    basePath: "/mantrapy",
+    iconUrl: {
+        light: "/icon-snake-gradient.svg",
+        dark: "/icon-snake-white.svg",
     },
-  ],
-  sidebar: [
-    {
-      text: "Getting Started",
-      link: "/getting-started",
+    logoUrl: {
+        light: "/logo-snake-black.svg",
+        dark: "/logo-snake-gradient.svg",
     },
-    {
-      text: "Modules",
-      items: [
-        {
-          text: "Wallet",
-          link: "/wallet",
-        },
-        {
-          text: "Client",
-          link: "/client",
-        },
-        {
-          text: "TxBuilder",
-          link: "/txbuilder",
-        },
-        {
-          text: "Webhooks",
-          link: "/webhooks",
-        },
-        {
-          text: "Constants",
-          link: "/constants",
-        },
-      ],
+    font: {
+        google: 'FT Sterling',
     },
-    {
-      text: "Examples",
-      items: [
+    title: "mantra-py",
+    socials: [
         {
-          text: "Webhooks API",
-          link: "/examples/webhooks-api",
+            icon: 'github',
+            link: 'https://github.com/Quantum-Architects',
         },
-      ],
-    },
-  ],
+    ],
+    sidebar: [
+        {
+            text: "Getting Started",
+            link: "/getting-started",
+        },
+        {
+            text: "Modules",
+            items: [
+                {
+                    text: "Wallet",
+                    link: "/wallet",
+                },
+                {
+                    text: "Client",
+                    link: "/client",
+                },
+                {
+                    text: "TxBuilder",
+                    link: "/txbuilder",
+                },
+                {
+                    text: "Webhooks",
+                    link: "/webhooks",
+                },
+                {
+                    text: "Constants",
+                    link: "/constants",
+                },
+            ],
+        },
+        {
+            text: "Examples",
+            items: [
+                {
+                    text: "Webhooks API",
+                    link: "/examples/webhooks-api",
+                },
+            ],
+        },
+    ],
 });
