@@ -2,6 +2,13 @@
 
 A Python library to interact with the Mantra chain
 
+## Docs
+
+```sh
+npm install
+npm run dev
+```
+
 ## ENV Variables
 
 - REST_ENDPOINT: defaults to 'https://api.mantrachain.io'
