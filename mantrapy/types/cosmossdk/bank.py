@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 
-from mantrapy.types.cosmossdk.coin import Coin, Coins
+from mantrapy.types.cosmossdk.coin import Coin
+from mantrapy.types.cosmossdk.coin import Coins
 from mantrapy.types.cosmossdk.query import PageResponse
 
 
@@ -11,19 +12,19 @@ class QueryBalanceResponse:
     balance: Coin
 
     @classmethod
-    def from_dict(cls, data: dict) -> "QueryBalanceResponse":
+    def from_dict(cls, data: dict) -> 'QueryBalanceResponse':
         return cls(
             balance=Coin(
-                denom=data["balances"]["denom"],
-                amount=data["balance"]["amount"],
+                denom=data['balances']['denom'],
+                amount=data['balance']['amount'],
             ),
         )
 
     def to_dict(self) -> dict:
         return {
-            "balance": {
-                "denom": self.balance.denom,
-                "amount": self.balance.amount,
+            'balance': {
+                'denom': self.balance.denom,
+                'amount': self.balance.amount,
             },
         }
 
@@ -36,27 +37,27 @@ class QueryBalancesResponse:
     pagination: PageResponse
 
     @classmethod
-    def from_dict(cls, data: dict) -> "QueryBalancesResponse":
+    def from_dict(cls, data: dict) -> 'QueryBalancesResponse':
         coins = Coins(
             [
-                Coin(denom=coin["denom"], amount=coin["amount"])
-                for coin in data["balances"]
+                Coin(denom=coin['denom'], amount=coin['amount'])
+                for coin in data['balances']
             ],
         )
 
         return cls(
             balances=coins,
-            pagination=PageResponse.from_dict(data["pagination"]),
+            pagination=PageResponse.from_dict(data['pagination']),
         )
 
     def to_dict(self) -> dict:
         return {
-            "balances": [
+            'balances': [
                 {
-                    "denom": coin.denom,
-                    "amount": coin.amount,
+                    'denom': coin.denom,
+                    'amount': coin.amount,
                 }
                 for coin in self.balances
             ],
-            "pagination": self.pagination.to_dict(),
+            'pagination': self.pagination.to_dict(),
         }
