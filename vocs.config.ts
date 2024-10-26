@@ -11,5 +11,9 @@ export default defineConfig({
       text: 'Webhooks API',
       link: '/webhooks-api',
     },
+    {
+      text: 'Webhooks',
+      link: '/webhooks',
+    },
   ],
 })

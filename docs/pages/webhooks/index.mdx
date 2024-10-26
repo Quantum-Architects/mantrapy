@@ -1,0 +1,138 @@
+# mantrapy Webhooks Documentation
+
+The `mantrapy` library provides tools for integrating webhooks into your application. This module is split into three main components: `ChainClient`, `EventProcessor`, and a `Webhook` class, which work together to facilitate real-time processing and handling of blockchain events through webhooks.
+
+## Components
+
+1. [`ChainClient`](#chainclient)
+2. [`EventProcessor`](#eventprocessor)
+3. [`Webhook`](#webhook)
+
+### ChainClient
+
+`ChainClient` manages WebSocket connections and subscriptions to blockchain event streams. This client is used to connect to CometBFT (prev. Tendermint) RPC.
+
+#### Class: ChainClient
+
+- **Parameters**:
+  - `websocket_url` (str): The WebSocket URL for the blockchain server.
+
+#### Methods
+
+- **`connect()`**: Establishes a connection to the WebSocket server.
+
+  - _Returns_: `None`
+  - _Raises_: `InvalidURI`, `InvalidHandshake`
+
+- **`subscribe(query, max_retries=3)`**: Subscribes to a specified query and yields incoming messages.
+  - **Parameters**:
+    - `query` (str): The query string to subscribe to. For example, to get all events when there's a transaction, use `"tm.event='Tx'"`. For more information about events subscription on CometBFT and Cosmos-SDK chains, refer to [their docs](https://docs.cosmos.network/main/learn/advanced/events#subscribing-to-events).
+    - `max_retries` (int): Maximum number of reconnection attempts.
+  - _Returns_: Async generator yielding WebSocket messages.
+  - _Raises_: `ConnectionClosedError`, `InvalidStatusCode`, `TimeoutError`
+
+#### Example
+
+```python
+from mantrapy.webhooks.chain_client import ChainClient
+import asyncio
+
+async def main():
+    client = ChainClient("wss://example.com/socket")
+    await client.connect()
+    async for message in client.subscribe("tm.event='Tx'"):
+        print("Received event:", message)
+
+asyncio.run(main())
+```
+
+### EventProcessor
+
+`EventProcessor` processes and sends events via a `POST` HTTP request to a specified webhook endpoint. It allows for retries and exponential backoff in case of network issues.
+
+#### Class: EventProcessor
+
+- Parameters:
+  - `webhook_url` (str): The URL of the webhook.
+  - `process_event_fn` (callable): A function to process raw events (filtering/formatting).
+  - `post_retries` (int): Number of retry attempts for failed webhook posts.
+
+#### Methods
+
+- `set_query(query)`: Sets a query to include in notifications.
+  - **Parameters**:
+    - `query` (str): The event query string.
+- `set_hook_id(hook_id)`: Sets a unique hook identifier.
+  - **Parameters**:
+    - `hook_id` (str): Identifier for the hook.
+- `process_events(events)`: Processes events and sends the result via a `POST` HTTP request to the webhook URL.
+  - **Parameters:**
+    - `events` (list): List of events to process.
+  - **_Raises_**: requests.exceptions.RequestException
+
+#### Example
+
+```python
+from mantrapy.webhooks.event_processor import EventProcessor
+
+def process_event_fn(events):
+    # Custom processing logic for events
+    return [{"type": event["type"], "data": event["attributes"]} for event in events]
+
+processor = EventProcessor("https://webhook.example.com", process_event_fn)
+processor.set_hook_id("hook_123")
+
+# Process a batch of events
+# Usually this comes from the subscription of a ChainClient
+events = [{'type': 'message', 'attributes': [{'key': 'action', 'value': '/cosmos.bank.v1beta1.MsgSend', 'index': True}, {'key': 'sender', 'value': 'mantra1nagtgts4y4s3d08ykqe0vsd68l53gnlujms9zj', 'index': True}, {'key': 'module', 'value': 'bank', 'index': True}, {'key': 'msg_index', 'value': '0', 'index': True}]}]
+processor.process_events(events)
+```
+
+### Webhook
+
+The `Webhook` class brings together `ChainClient` and `EventProcessor` to handle WebSocket subscriptions and send events to a specified webhook URL.
+
+#### Class: Webhook
+
+- **Parameters**:
+  - `websocket_url` (str): WebSocket URL for blockchain connections.
+  - `webhook_url` (str): URL for sending processed events.
+  - `process_fn` (callable): A function for processing WebSocket events.
+  - `event_query` (str): Query for the events to subscribe to on the CometBFT (prev. Tendermint) RPC. Defaults to `"tm.event='Tx'"`. For more information, [refer to their docs](https://docs.cosmos.network/main/learn/advanced/events#subscribing-to-events).
+- **Methods**
+  - `listen()`: Listens for incoming events and processes them before forwarding to the webhook URL.
+    - **_Returns_**: `None`
+    - **_Raises_**: `JSONDecodeError`, `KeyError`
+
+#### Example
+
+```python
+from mantrapy.webhooks.webhook import Webhook
+
+# Define a custom event processing function
+def process_event(events):
+    return [{"event_type": event["type"], "content": event["attributes"]} for event in events]
+
+webhook = Webhook("wss://blockchain.example.com/socket", "https://webhook.example.com", process_event)
+
+# Start listening for events
+import asyncio
+asyncio.run(webhook.listen())
+```
+
+#### Example Usage: SmartContractWebhook
+
+A specialized webhook for handling smart contract events, `SmartContractWebhook` uses the `Webhook` base class and custom event-processing logic.
+
+```python
+from mantrapy.webhooks.hooks.webhook import Webhook
+from mantrapy.webhooks.modules.smart_contract import get_smart_contracts_events
+
+class SmartContractWebhook(Webhook):
+    def __init__(self, websocket_url, webhook_url):
+        super().__init__(websocket_url, webhook_url, get_smart_contracts_events)
+
+# Usage
+smart_contract_webhook = SmartContractWebhook("wss://smartchain.example.com/socket", "https://webhook.example.com")
+asyncio.run(smart_contract_webhook.listen())
+```
