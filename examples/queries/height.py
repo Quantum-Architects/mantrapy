@@ -1,9 +1,8 @@
-from mantrapy.client.client import API
 from mantrapy.client.client import Client
-from mantrapy.client.client import RPC
+from mantrapy.constants.constants import Constants
 
-client = Client(API, RPC)
-
+constants = Constants()
+client = Client(constants.api_endpoint, constants.rpc_endpoint)
 
 height_resp = client.get_height()
 print(height_resp.data)
