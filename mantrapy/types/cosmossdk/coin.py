@@ -11,6 +11,13 @@ class Coin:
     denom: str
     amount: str
 
+    @classmethod
+    def from_dict(cls, data: dict) -> 'Coin':
+        return cls(
+            denom=data['denom'],
+            amount=data['amount'],
+        )
+
 
 class Coins(List[Coin]):
     """

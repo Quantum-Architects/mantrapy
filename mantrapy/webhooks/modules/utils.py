@@ -33,10 +33,11 @@ def get_events_by_attribute(
         if any(a['key'] == attr for a in e['attributes'])
     ]
 
+
 def get_events_by_attr_value(
     attribute: str,
     attr_val: str,
-    events: 
+    events:
     List[CosmosEvent],
 ) -> List[CosmosEvent]:
     return [
