@@ -4,7 +4,7 @@ from mantrapy.types.cometbft.block import Block, BlockID, ResultBlock
 from mantrapy.types.cometbft.consensus import SyncInfo
 from mantrapy.types.cometbft.tx import ResultTx
 from mantrapy.types.cosmossdk.account import Account, QueryAccountResponse
-from mantrapy.types.cosmossdk.bank import QueryAllBalancesResponse
+from mantrapy.types.cosmossdk.bank import QueryBalancesResponse
 from mantrapy.types.cosmossdk.distribution import QueryDelegationTotalRewardsResponse
 from mantrapy.types.cosmossdk.staking import QueryDelegatorDelegationsResponse
 from mantrapy.types.cosmossdk.types import QueryResponse
@@ -29,7 +29,7 @@ TX_PATHS = {"tx": "/cosmos/tx/v1beta1/txs"}
 
 class Client:
     """
-    Client defines a type to perform queries against the Mantra chain.
+    Client defines a type to interact with a Mantra chain node.
     """
 
     def __init__(
@@ -39,9 +39,6 @@ class Client:
         timeout: int = TIMEOUT,
         max_retries: int = MAX_RETRIES,
     ) -> None:
-        """
-        Initialize the class with base API and RPC URLs.
-        """
         # Cosmos SDK endpoint.
         self.api = api.rstrip("/")
         # CometBFT endpoint.
@@ -64,11 +61,13 @@ class Client:
         return self.rpc + path
 
     def _make_request(
-        self, url: str, method: str = "GET", json: str = None, **kwargs
+        self, url: str, method: str = "GET", json: str = "", **kwargs
     ) -> QueryResponse:
         """
         Make HTTP request with retries and error handling.
         """
+
+        query_response = QueryResponse()
 
         # Repeat the request if it is failing
         for attempt in range(self.max_retries):
@@ -80,21 +79,19 @@ class Client:
                     json=json,
                     **kwargs,
                 )
-                data = response.json()
+                query_response.data = response.json()
+                query_response.status_code = response.status_code
 
-                return QueryResponse(
-                    data=data,
-                    status_code=response.status_code,
-                )
+                return query_response
 
             except Exception as e:
+                # Return a response with error only if we reached the number of
+                # retry.
                 if attempt == self.max_retries - 1:
-                    return QueryResponse(
-                        error=str(e),
-                        status_code=500,
-                    )
+                    query_response.error = str(e)
+                    query_response.status_code = 500
 
-        raise Exception("The request should be performed at least once.")
+        return query_response
 
     # ---------------------------------------------------------------------------------------------
     # API
@@ -107,11 +104,9 @@ class Client:
         url = self.create_api_url(QUERY_PATHS["account"].format(address=address))
         resp = self._make_request(url)
 
-        if not resp.is_success():
+        # Short circuit if response is not successful of returned data is empty.
+        if (not resp.is_success()) or (not resp.data):
             return resp
-
-        if not resp.data:
-            raise Exception("Data returned by query is nil")
 
         try:
 
@@ -127,7 +122,7 @@ class Client:
                 status_code=resp.status_code,
             )
 
-    def get_balances(self, address: str) -> QueryResponse[QueryAllBalancesResponse]:
+    def get_balances(self, address: str) -> QueryResponse[QueryBalancesResponse]:
         """
         Query the balance associated with a particular address.
         """
@@ -135,15 +130,13 @@ class Client:
         url = self.create_api_url(QUERY_PATHS["balances"].format(address=address))
         resp = self._make_request(url)
 
-        if not resp.is_success():
+        # Short circuit if response is not successful of returned data is empty.
+        if (not resp.is_success()) or (not resp.data):
             return resp
-
-        if not resp.data:
-            raise Exception("Data returned by query is nil")
 
         try:
             return QueryResponse(
-                data=QueryAllBalancesResponse.from_dict(resp.data),
+                data=QueryBalancesResponse.from_dict(resp.data),
                 status_code=resp.status_code,
             )
 
@@ -166,11 +159,9 @@ class Client:
         )
         resp = self._make_request(url)
 
-        if not resp.is_success():
+        # Short circuit if response is not successful of returned data is empty.
+        if (not resp.is_success()) or (not resp.data):
             return resp
-
-        if not resp.data:
-            raise Exception("Data returned by query is nil")
 
         try:
 
@@ -198,11 +189,9 @@ class Client:
         )
         resp = self._make_request(url)
 
-        if not resp.is_success():
+        # Short circuit if response is not successful of returned data is empty.
+        if (not resp.is_success()) or (not resp.data):
             return resp
-
-        if not resp.data:
-            raise Exception("Data returned by query is nil")
 
         try:
 
@@ -236,11 +225,9 @@ class Client:
         url = self.create_rpc_url(QUERY_PATHS["status"])
         resp = self._make_request(url)
 
-        if not resp.is_success():
+        # Short circuit if response is not successful of returned data is empty.
+        if (not resp.is_success()) or (not resp.data):
             return resp
-
-        if not resp.data:
-            raise Exception("Data returned by query is nil")
 
         try:
             return QueryResponse(
@@ -334,11 +321,9 @@ class Client:
         url = self.create_rpc_url(QUERY_PATHS["block_by_hash"].format(hash=_hash))
         resp = self._make_request(url)
 
-        if not resp.is_success():
+        # Short circuit if response is not successful of returned data is empty.
+        if (not resp.is_success()) or (not resp.data):
             return resp
-
-        if not resp.data:
-            raise Exception("Data returned by query is nil")
 
         try:
             block = Block.from_dict(resp.data["result"]["block"])
@@ -363,13 +348,11 @@ class Client:
         Query a transaction associated with a particular hash.
         """
         url = self.create_rpc_url(QUERY_PATHS["tx"].format(hash=_hash))
-        resp = self._make_request(url)
+        resp = self._make_request(url, "POST")
 
-        if not resp.is_success():
+        # Short circuit if response is not successful of returned data is empty.
+        if (not resp.is_success()) or (not resp.data):
             return resp
-
-        if not resp.data:
-            raise Exception("Data returned by query is nil")
 
         try:
             return QueryResponse(
