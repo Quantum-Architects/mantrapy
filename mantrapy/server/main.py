@@ -93,8 +93,14 @@ async def lifespan(app: FastAPI):
                 )
         logger.info(f"Found {len(existing_hooks)} hooks in the database.")
 
-    asyncio.create_task(process_events())
+    task = asyncio.create_task(process_events())
     yield
+    # Clean up and shutdown
+    task.cancel()
+    try:
+        await task
+    except asyncio.CancelledError:
+        pass
     try:
         # Close the WebSocket connection on server shutdow
         if chain_client.websocket:
