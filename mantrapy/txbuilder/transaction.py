@@ -10,23 +10,19 @@ from mantrapy.proto.cosmos.tx.v1beta1.tx_pb2 import ModeInfo
 from mantrapy.proto.cosmos.tx.v1beta1.tx_pb2 import SignDoc
 from mantrapy.proto.cosmos.tx.v1beta1.tx_pb2 import SignerInfo
 from mantrapy.proto.cosmos.tx.v1beta1.tx_pb2 import TxBody
+from mantrapy.proto.cosmos.tx.v1beta1.tx_pb2 import TxRaw
 
 
 def create_body_bytes(msg: Message, memo: str):
     any = Any()
     any.Pack(msg, type_url_prefix='/')
     return TxBody(messages=[any], memo=memo)
-    # body.messages.messages([any])
-    # body.memo = memo
-    # self.body = body
-
 
 def create_fee(fee_amount: str, fee_denom: str, gas_limit: str):
     coin = Coin(denom=fee_denom, amount=fee_amount)
     return Fee(gas_limit=int(gas_limit), amount=[coin])
 
-
-def create_signer_info(public_key_bytes: str, sequence: int):
+def create_signer_info(public_key_bytes: bytes, sequence: int):
     public_key = Any()
     public_key.Pack(Secp256PubKey(key=public_key_bytes), type_url_prefix='/')
     return SignerInfo(
@@ -35,10 +31,8 @@ def create_signer_info(public_key_bytes: str, sequence: int):
         sequence=sequence,
     )
 
-
 def create_auth_info_bytes(signer_info: SignerInfo, fee: Fee):
     return AuthInfo(signer_infos=[signer_info], fee=fee)
-
 
 def create_sig_doc(
     body: TxBody,
@@ -54,18 +48,13 @@ def create_sig_doc(
     return doc.SerializeToString()
 
 
-# def create_signatures(self):
-#     to_sign = self.create_sig_doc()
-#     return self.builder.wallet.sign(sha3_256(to_sign).digest())
-
-
 def create_tx_template(
     msg: Message,
     memo: str,
     fee_amount: str,
     fee_denom: str,
     gas_limit: str,
-    pubkey: str,
+    pubkey: bytes,
     sequence: int,
 ):
     return create_body_bytes(msg, memo), create_auth_info_bytes(
@@ -73,22 +62,7 @@ def create_tx_template(
         create_fee(fee_amount, fee_denom, gas_limit),
     )
 
+def create_tx_raw(body_bytes, auth_info, signature):
+    tx = TxRaw(body_bytes = body_bytes, auth_info_bytes = auth_info, signatures=[signature])
+    return tx
 
-#
-#     def generate_tx(self,
-#                     builder: TransactionBuilder,
-#                     msg: Message,
-#                     memo: str = MEMO,
-#                     fee: str = FEE,
-#                     gas_limit: str = GAS_LIMIT):
-#         self.create_tx_template(builder, msg, memo, fee, gas_limit)
-#         return self.create_tx_raw_with_class_info(self.create_signatures())
-#
-#
-# def create_tx_raw(body_bytes, auth_info, signature):
-#     tx = TxRaw()
-#     tx.body_bytes = body_bytes
-#     tx.auth_info_bytes = auth_info
-#     tx.signatures.append(signature)
-#     return tx
-#
