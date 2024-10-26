@@ -34,10 +34,10 @@ chain_client = ChainClient(websocket_url)
 registered_hooks_cache = {}
 
 
-async def run_process_fn(process_fn, events, hook_id):
+async def async_process_fn(process_fn, events, hook_id):
     """Wrapper to run process_fn with error handling."""
     try:
-        await process_fn(events)
+        process_fn(events)
     except Exception as e:
         logger.error(f"Error processing event in hook {hook_id}: {e}")
 
@@ -57,7 +57,7 @@ async def process_event(ws_event):
         # Iterate through the cached hooks and create a task for each process_fn
         for hook_id, process_fn in registered_hooks_cache.items():
             tasks.append(
-                asyncio.create_task(run_process_fn(process_fn, events, hook_id))
+                asyncio.create_task(async_process_fn(process_fn, events, hook_id))
             )
 
         # Wait for all tasks to complete
