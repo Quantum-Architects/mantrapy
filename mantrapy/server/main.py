@@ -8,8 +8,7 @@ from pydantic import BaseModel
 
 from mantrapy.server.event_processor import get_event_processor
 from mantrapy.webhooks.chain_client import ChainClient
-
-# from mantrapy.server.databases import SessionLocal, Webhook
+from mantrapy.server.databases import SessionLocal, Webhook
 
 
 # data model for the request body
@@ -70,16 +69,16 @@ async def process_events():
 async def lifespan(app: FastAPI):
     # Startup actions
     await chain_client.connect()  # Connect to WebSocket
-    # with SessionLocal() as db:
-    #     existing_hooks = db.query(Webhook).all()
-    #     for hook in existing_hooks:
-    #         try:
-    #             # Attempt to create an event processor
-    #             processor = get_event_processor(hook.url, hook.query)
-    #             # Cache the hooks and their corresponding event processor
-    #             registered_hooks_cache[hook.id] = processor
-    #         except ValueError as e:
-    #             print(f"Error creating EventProcessor for hook ID {hook.id}: {e}")
+    with SessionLocal() as db:
+        existing_hooks = db.query(Webhook).all()
+        for hook in existing_hooks:
+            try:
+                # Attempt to create an event processor
+                processor = get_event_processor(hook.url, hook.query)
+                # Cache the hooks and their corresponding event processor
+                registered_hooks_cache[hook.id] = processor
+            except ValueError as e:
+                print(f"Error creating EventProcessor for hook ID {hook.id}: {e}")
 
     # Start the event processor in the background
     asyncio.create_task(process_events())
@@ -107,10 +106,10 @@ async def create_webhook(req: WebhookRequest):
         # Return a 404 error if get_event_processor fails
         raise HTTPException(status_code=404, detail=str(e))
 
-    # with SessionLocal() as db:
-    #     new_webhook = Webhook(id=hook_id, query=query, url=url)
-    #     db.add(new_webhook)
-    #     db.commit()
+    with SessionLocal() as db:
+        new_webhook = Webhook(id=hook_id, event_type=req.query, url=req.url)
+        db.add(new_webhook)
+        db.commit()
 
     # Cache the new hook
     registered_hooks_cache[hook_id] = processor
@@ -120,13 +119,13 @@ async def create_webhook(req: WebhookRequest):
 @app.delete("/webhooks/{hook_id}")
 async def delete_webhook(hook_id: str):
     """Remove a webhook from the database."""
-    # with SessionLocal() as db:
-    #     webhook = db.query(Webhook).filter(Webhook.id == hook_id).first()
-    #     if not webhook:
-    #         raise HTTPException(status_code=404, detail="Webhook not found")
+    with SessionLocal() as db:
+        webhook = db.query(Webhook).filter(Webhook.id == hook_id).first()
+        if not webhook:
+            raise HTTPException(status_code=404, detail="Webhook not found")
 
-    #     db.delete(webhook)
-    #     db.commit()
+        db.delete(webhook)
+        db.commit()
 
     # Remove from cache
     registered_hooks_cache.pop(hook_id, None)
@@ -136,21 +135,18 @@ async def delete_webhook(hook_id: str):
 @app.get("/webhooks/")
 async def get_webhooks():
     """List webhooks."""
-    # with SessionLocal() as db:
-    #     webhooks = db.query(Webhook).all()
+    with SessionLocal() as db:
+        webhooks = db.query(Webhook).all()
 
-    # TODO get data from DB NOT from cache
-    hook_ids = list(registered_hooks_cache.keys())
-    return {"hooks": hook_ids}
+    return {"hooks": webhooks}
 
 
 @app.get("/webhooks/{hook_id}")
 async def get_webhook(hook_id: str):
     """Get webhook by ID."""
-    # with SessionLocal() as db:
-    #     webhook = db.query(Webhook).filter(Webhook.id == hook_id).first()
-    #     if not webhook:
-    #         raise HTTPException(status_code=404, detail="Webhook not found")
+    with SessionLocal() as db:
+        webhook = db.query(Webhook).filter(Webhook.id == hook_id).first()
+        if not webhook:
+            raise HTTPException(status_code=404, detail="Webhook not found")
 
-    # TODO get data from DB NOT from cache
-    return {"hook": "TODO, get hook from DB"}
+    return {"hook": webhook}

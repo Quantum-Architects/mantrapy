@@ -17,7 +17,7 @@ Base = declarative_base()
 class Webhook(Base):
     __tablename__ = "webhooks"
 
-    id = Column(Integer, primary_key=True, index=True)
+    id = Column(String, primary_key=True, index=True)
     url = Column(String, index=True)
     event_type = Column(String, index=True)
 
