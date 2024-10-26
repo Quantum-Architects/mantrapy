@@ -28,6 +28,8 @@ QUERY_PATHS = {
     "delegation_total_rewards": "/cosmos/distribution/v1beta1/delegators/{delegator_address}/rewards",
 }
 
+TX_PATHS = {"tx": "/cosmos/tx/v1beta1/txs"}
+
 
 class Client:
     """
@@ -67,7 +69,9 @@ class Client:
         """
         return self.rpc + path
 
-    def _make_request(self, url: str, method: str = "GET", **kwargs) -> QueryResponse:
+    def _make_request(
+        self, url: str, method: str = "GET", json: str = None, **kwargs
+    ) -> QueryResponse:
         """
         Make HTTP request with retries and error handling.
         """
@@ -79,6 +83,7 @@ class Client:
                     method,
                     url,
                     timeout=self.timeout,
+                    json=json,
                     **kwargs,
                 )
                 data = response.json()
@@ -219,6 +224,16 @@ class Client:
                 error=f"Invalid response format: {str(e)}",
                 status_code=resp.status_code,
             )
+
+    def broadcast(self, tx) -> str:
+        url = self.create_api_url(TX_PATHS["tx"])
+        resp = requests.post(
+            url=url,
+            json=tx,
+        )
+        if resp.status_code == 200:
+            return resp.json()
+        raise Exception("error broadcasting")
 
     # ---------------------------------------------------------------------------------------------
     # RPC
