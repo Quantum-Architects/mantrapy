@@ -74,7 +74,7 @@ async def lifespan(app: FastAPI):
         for hook in existing_hooks:
             try:
                 # Attempt to create an event processor
-                processor = get_event_processor(hook.url, hook.query)
+                processor = get_event_processor(hook.id, hook.url, hook.query)
                 # Cache the hooks and their corresponding event processor
                 registered_hooks_cache[hook.id] = processor
             except ValueError as e:
