@@ -16,9 +16,9 @@ class ChainClient:
 
         try:
             self.websocket = await websockets.connect(self.websocket_url)
-            print("WebSocket connection established.")
+            print('WebSocket connection established.')
         except (websockets.InvalidURI, websockets.InvalidHandshake) as e:
-            print(f"Failed to connect: {e}")
+            print(f'Failed to connect: {e}')
             self.websocket = None
 
     async def subscribe(self, query, max_retries=3):
@@ -29,22 +29,22 @@ class ChainClient:
         while retry_count < max_retries:
             try:
                 await self.websocket.send(
-                    f'{{"jsonrpc":"2.0","method":"subscribe","params":["{query}"],"id":1}}'
+                    f'{{"jsonrpc":"2.0","method":"subscribe","params":["{query}"],"id":1}}',
                 )
                 while True:
                     message = await self.websocket.recv()
                     yield message
             except websockets.ConnectionClosedError as e:
-                print(f"Connection error: {e}. Retrying...")
+                print(f'Connection error: {e}. Retrying...')
                 retry_count += 1
                 await asyncio.sleep(2)  # Wait before retrying
             except websockets.InvalidStatusCode as e:
-                print(f"Invalid status code error: {e}. Retrying...")
+                print(f'Invalid status code error: {e}. Retrying...')
                 retry_count += 1
                 await asyncio.sleep(2)  # Wait before retrying
             except asyncio.TimeoutError:
-                print("Connection timed out. Retrying...")
+                print('Connection timed out. Retrying...')
                 retry_count += 1
                 await asyncio.sleep(2)  # Wait before retrying
 
-        print("Max reconnect attempts reached. Exiting...")
+        print('Max reconnect attempts reached. Exiting...')

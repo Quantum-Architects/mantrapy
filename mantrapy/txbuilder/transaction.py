@@ -65,4 +65,3 @@ def create_tx_template(
 def create_tx_raw(body_bytes, auth_info, signature):
     tx = TxRaw(body_bytes = body_bytes, auth_info_bytes = auth_info, signatures=[signature])
     return tx
-

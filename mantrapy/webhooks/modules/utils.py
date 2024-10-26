@@ -36,7 +36,7 @@ def get_events_by_attribute(
 def get_events_by_attr_value(
     attribute: str,
     attr_val: str,
-    events: 
+    events:
     List[CosmosEvent],
 ) -> List[CosmosEvent]:
     return [

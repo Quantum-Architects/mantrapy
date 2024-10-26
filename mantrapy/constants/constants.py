@@ -19,4 +19,4 @@ class Constants:
         self.api_endpoint = 'https://api.dukong.mantrachain.io/'
         self.rpc_endpoint = 'https://rpc.dukong.mantrachain.io/'
         self.denom = 'uom'
-        self.chain_id = "mantra-dukong-1"
+        self.chain_id = 'mantra-dukong-1'

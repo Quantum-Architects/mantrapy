@@ -1,11 +1,14 @@
-from sqlalchemy import create_engine, Column, String, Integer
+from sqlalchemy import Column
+from sqlalchemy import create_engine
+from sqlalchemy import Integer
+from sqlalchemy import String
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
-DATABASE_URL = "sqlite:///./webhooks.db"
+DATABASE_URL = 'sqlite:///./webhooks.db'
 
 # Create the SQLAlchemy engine
-engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
+engine = create_engine(DATABASE_URL, connect_args={'check_same_thread': False})
 
 # Create a session maker
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
@@ -15,7 +18,7 @@ Base = declarative_base()
 
 
 class Webhook(Base):
-    __tablename__ = "webhooks"
+    __tablename__ = 'webhooks'
 
     id = Column(String, primary_key=True, index=True)
     url = Column(String, index=True)

@@ -1,5 +1,5 @@
-from mantrapy.webhooks.modules.tokenfactory import get_token_factory_events
 from mantrapy.webhooks.hooks.webhook import Webhook
+from mantrapy.webhooks.modules.tokenfactory import get_token_factory_events
 
 
 class TokenFactoryWebhook(Webhook):

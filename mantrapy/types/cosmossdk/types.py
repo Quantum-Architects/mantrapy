@@ -1,7 +1,9 @@
 from dataclasses import dataclass
-from typing import Generic, Optional, TypeVar
+from typing import Generic
+from typing import Optional
+from typing import TypeVar
 
-T = TypeVar("T")
+T = TypeVar('T')
 
 
 SUCCESS_CODE = [

@@ -6,4 +6,3 @@ TEST_ADDRESS = 'mantra1qj5477l97xch25a7dfs6mjpcxp5n209purvvwg'
 def test_wallet_generator():
     w = wallet_from_mnemonic( TEST_MNEMONIC)
     assert w.address == TEST_ADDRESS
-
