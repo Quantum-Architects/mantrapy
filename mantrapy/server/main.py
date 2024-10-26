@@ -6,7 +6,6 @@ from uuid import uuid4
 
 from fastapi import FastAPI
 from fastapi import HTTPException
-from fastapi import logger
 from pydantic import BaseModel
 
 from mantrapy.server.databases import SessionLocal
