@@ -118,6 +118,10 @@ In this example, the webhook will send a `POST` request to the `https://webhook.
 }
 ```
 
+Note that the resulting `events` array was processed by the
+`process_event_fn` and changed the original `attributes` field
+for a `data` field.
+
 ### Webhook
 
 The `Webhook` class brings together `ChainClient` and `EventProcessor` to handle WebSocket subscriptions and send events to a specified webhook URL.
