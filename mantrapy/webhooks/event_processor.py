@@ -9,9 +9,15 @@ from tenacity import (
 
 class EventProcessor:
 
-    def __init__(self, webhook_url, process_event_fn):
+    def __init__(self, webhook_url, process_event_fn, post_retries=3):
         self.webhook_url = webhook_url
         self.process_fn = process_event_fn
+
+        self.send_notification_with_retry = retry(
+            stop=stop_after_attempt(post_retries),
+            wait=wait_exponential(multiplier=1, min=2, max=10),
+            retry=retry_if_exception_type(requests.exceptions.RequestException),
+        )(self._send_notification)
 
     def set_query(self, query):
         self.query = query
@@ -28,13 +34,13 @@ class EventProcessor:
             notification["query"] = self.query
         if self.hook_id is not None:
             notification["hook_id"] = self.hook_id
-        self.send_notification(notification)
+        self.send_notification_with_retry(notification)
 
     @retry(
         stop=stop_after_attempt(3),
         wait=wait_exponential(multiplier=1, min=2, max=10),
         retry=retry_if_exception_type(requests.exceptions.RequestException),
     )
-    def send_notification(self, notification):
+    def _send_notification(self, notification):
         response = requests.post(self.webhook_url, json=notification)
         response.raise_for_status()

@@ -4,10 +4,17 @@ from typing import Generic, Optional, TypeVar
 T = TypeVar("T")
 
 
+SUCCESS_CODE = [
+    200,
+    201,
+    202,
+]
+
+
 @dataclass
 class QueryResponse(Generic[T]):
     """
-    Generic response wrapper with error handling
+    Generic response returned by the client to the caller of the request.
     """
 
     data: Optional[T] = None
@@ -15,4 +22,7 @@ class QueryResponse(Generic[T]):
     status_code: Optional[int] = None
 
     def is_success(self) -> bool:
-        return self.error is None and self.status_code in {200, 201, 202}
+        """
+        Return true if the request completes successfully.
+        """
+        return self.error is None and self.status_code in SUCCESS_CODE

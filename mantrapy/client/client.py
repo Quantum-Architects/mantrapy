@@ -1,12 +1,14 @@
 import requests
 
-from mantrapy.querier.types import QueryResponse
 from mantrapy.types.cometbft.block import Block, BlockID, ResultBlock
 from mantrapy.types.cometbft.consensus import SyncInfo
 from mantrapy.types.cometbft.tx import ResultTx
 from mantrapy.types.cosmossdk.account import Account, QueryAccountResponse
 from mantrapy.types.cosmossdk.bank import QueryAllBalancesResponse
+from mantrapy.types.cosmossdk.staking import QueryDelegatorDelegationsResponse
+from mantrapy.types.cosmossdk.types import QueryResponse
 
+# TODO: should be moved to a config.
 TIMEOUT = 10
 MAX_RETRIES = 3
 RETRY_DELAY = 1
@@ -21,12 +23,13 @@ QUERY_PATHS = {
     "block_by_hash": "block?hash={hash}",
     "block": "block?height={height}",
     "tx": "/tx?hash={hash}",
+    "delegator_delegations": "/cosmos/staking/v1beta1/delegations/{delegator_addr}",
 }
 
 
 class Client:
     """
-    Querier defines a type to perform queries against the Mantra chain.
+    Client defines a type to perform queries against the Mantra chain.
     """
 
     def __init__(
@@ -140,6 +143,39 @@ class Client:
             return QueryResponse(
                 data=QueryAllBalancesResponse.from_dict(resp.data),
                 status_code=resp.status_code,
+            )
+
+        except KeyError as e:
+            return QueryResponse(
+                error=f"Invalid response format: {str(e)}",
+                status_code=resp.status_code,
+            )
+
+    def get_delegator_delegations(
+        self, address: str
+    ) -> QueryResponse[QueryDelegatorDelegationsResponse]:
+        """
+        Query the delegations associated with a delegator.
+        """
+
+        url = self.create_api_url(
+            QUERY_PATHS["delegator_delegations"].format(delegator_addr=address)
+        )
+        resp = self._make_request(url)
+
+        if not resp.is_success():
+            return resp
+
+        if not resp.data:
+            raise Exception("Data returned by query is nil")
+
+        try:
+
+            delegator_delegations = QueryDelegatorDelegationsResponse.from_dict(
+                resp.data
+            )
+            return QueryResponse(
+                data=delegator_delegations, status_code=resp.status_code
             )
 
         except KeyError as e:
