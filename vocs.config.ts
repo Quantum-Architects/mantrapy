@@ -2,7 +2,18 @@ import { defineConfig } from "vocs";
 
 export default defineConfig({
   basePath: "/mantrapy",
-  title: "Mantra-py",
+  iconUrl: {
+    light: "/Icon-gradient.svg",
+    dark: "/Icon-white.svg",
+  },
+  logoUrl: {
+    light: "/logo-black.svg",
+    dark: "/logo-gradient.svg",
+  },
+  font: {
+    google: 'FT Sterling',
+  },
+  title: "mantra-py",
   sidebar: [
     {
       text: "Getting Started",
