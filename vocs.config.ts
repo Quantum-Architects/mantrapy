@@ -9,16 +9,34 @@ export default defineConfig({
       link: "/getting-started",
     },
     {
-      text: "Wallet",
-      link: "/wallet",
+      text: "Modules",
+      items: [
+        {
+          text: "Wallet",
+          link: "/wallet",
+        },
+        {
+          text: "Client",
+          link: "/client",
+        },
+        {
+          text: "TxBuilder",
+          link: "/txbuilder",
+        },
+        {
+          text: "Webhooks",
+          link: "/webhooks",
+        },
+      ],
     },
     {
-      text: "Webhooks API",
-      link: "/webhooks-api",
-    },
-    {
-      text: 'Webhooks',
-      link: '/webhooks',
+      text: "Examples",
+      items: [
+        {
+          text: "Webhooks API",
+          link: "/webhooks-api",
+        },
+      ],
     },
   ],
 });
