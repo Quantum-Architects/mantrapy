@@ -21,9 +21,9 @@ class TxBuilder:
 
     def update_account_info(self):
         acc = self.client.get_account(self.wallet.address)
-        self.pubkey = acc.account.pub_key.key
-        self.account_number = acc.account.account_number
-        self.sequence = acc.account.sequence
+        self.pubkey =  base64.b64decode(acc.data.account.pub_key.key)
+        self.account_number = acc.data.account.account_number
+        self.sequence = acc.data.account.sequence
 
     def sign_message(self, sign_doc) ->bytes:
         return self.wallet.sign_document(sign_doc)
@@ -61,7 +61,7 @@ class TxBuilder:
         fee = "3257"
         gas = "271402"
 
-        msg = generate_bank_send_msg(self.wallet.address, dst, denom, str(amount))
+        msg = generate_bank_send_msg(self.wallet.address, dst, str(amount), denom)
 
         body, auth_info = create_tx_template(msg,"", fee,self.constants.denom, gas, self.pubkey, int(self.sequence))
         sign_doc = create_sig_doc(body,auth_info,self.constants.chain_id,int(self.account_number))
