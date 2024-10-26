@@ -1,7 +1,8 @@
 from contextlib import asynccontextmanager
 import json
+import logging
 from uuid import uuid4
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, logger
 import asyncio
 
 from pydantic import BaseModel
@@ -9,6 +10,9 @@ from pydantic import BaseModel
 from mantrapy.server.event_processor import get_event_processor
 from mantrapy.webhooks.chain_client import ChainClient
 from mantrapy.server.databases import SessionLocal, Webhook
+
+# Retrieve FastAPI's default logger
+logger = logging.getLogger("uvicorn")
 
 
 # data model for the request body
@@ -31,38 +35,40 @@ async def run_process_fn(process_fn, events, hook_id):
     try:
         await process_fn(events)
     except Exception as e:
-        print(f"Error processing event in hook {hook_id}: {e}")
+        logger.error(f"Error processing event in hook {hook_id}: {e}")
+
+
+async def process_event(ws_event):
+    # Decode the incoming message if it's JSON
+    if isinstance(ws_event, str):
+        ws_event = json.loads(ws_event)
+    if "events" in ws_event.get("result", {}) and "message.msg_index" in ws_event[
+        "result"
+    ].get("events", {}):
+        events = ws_event["result"]["data"]["value"]["TxResult"]["result"]["events"]
+
+        # Create a list to hold all processing tasks
+        tasks = []
+
+        # Iterate through the cached hooks and create a task for each process_fn
+        for hook_id, process_fn in registered_hooks_cache.items():
+            tasks.append(
+                asyncio.create_task(run_process_fn(process_fn, events, hook_id))
+            )
+
+        # Wait for all tasks to complete
+        await asyncio.gather(*tasks)
 
 
 async def process_events():
     """Listen for events from the ChainClient and post to registered webhooks."""
     async for ws_event in chain_client.subscribe("tm.event='Tx'"):
+        logger.debug("Processing new events...")
         try:
-            # Decode the incoming message if it's JSON
-            if isinstance(ws_event, str):
-                ws_event = json.loads(ws_event)
-            if "events" in ws_event.get(
-                "result", {}
-            ) and "message.msg_index" in ws_event["result"].get("events", {}):
-                events = ws_event["result"]["data"]["value"]["TxResult"]["result"][
-                    "events"
-                ]
-
-                # Create a list to hold all processing tasks
-                tasks = []
-
-                # Iterate through the cached hooks and create a task for each process_fn
-                for hook_id, process_fn in registered_hooks_cache.items():
-                    tasks.append(
-                        asyncio.create_task(run_process_fn(process_fn, events, hook_id))
-                    )
-
-                # Wait for all tasks to complete
-                await asyncio.gather(*tasks)
-
+            await process_event(ws_event)
         except (json.JSONDecodeError, KeyError) as e:
-            print(f"Error parsing event data: {e}")
-            print("Raw event data:", ws_event)
+            logger.error(f"Error parsing event data: {e}")
+            logger.error("Raw event data:", ws_event)
 
 
 @asynccontextmanager
@@ -78,17 +84,19 @@ async def lifespan(app: FastAPI):
                 # Cache the hooks and their corresponding event processor
                 registered_hooks_cache[hook.id] = processor
             except ValueError as e:
-                print(f"Error creating EventProcessor for hook ID {hook.id}: {e}")
+                logger.error(
+                    f"Error creating EventProcessor for hook ID {hook.id}: {e}"
+                )
+        logger.info(f"Found {len(existing_hooks)} hooks in the database.")
 
-    # Start the event processor in the background
     asyncio.create_task(process_events())
     yield
-    # Close the WebSocket connection on server shutdow
-    if chain_client.websocket:
-        try:
+    try:
+        # Close the WebSocket connection on server shutdow
+        if chain_client.websocket:
             await chain_client.websocket.close()
-        except Exception as e:
-            print(f"Error closing ws connection: {e}")
+    except Exception as e:
+        logger.error(f"Error closing ws connection: {e}")
 
 
 app = FastAPI(lifespan=lifespan)
@@ -103,8 +111,8 @@ async def create_webhook(req: WebhookRequest):
     try:
         processor = get_event_processor(hook_id, req.url, req.query)
     except ValueError as e:
-        # Return a 404 error if get_event_processor fails
-        raise HTTPException(status_code=404, detail=str(e))
+        # Return a 400 error if get_event_processor fails
+        raise HTTPException(status_code=400, detail=str(e))
 
     with SessionLocal() as db:
         new_webhook = Webhook(id=hook_id, query=req.query, url=req.url)
