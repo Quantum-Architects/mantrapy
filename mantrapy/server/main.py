@@ -107,7 +107,7 @@ async def create_webhook(req: WebhookRequest):
         raise HTTPException(status_code=404, detail=str(e))
 
     with SessionLocal() as db:
-        new_webhook = Webhook(id=hook_id, event_type=req.query, url=req.url)
+        new_webhook = Webhook(id=hook_id, query=req.query, url=req.url)
         db.add(new_webhook)
         db.commit()
 
