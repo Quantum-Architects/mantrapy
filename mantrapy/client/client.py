@@ -118,7 +118,8 @@ class Client:
 
             account = Account.from_dict(resp.data)
             return QueryResponse(
-                data=QueryAccountResponse(account=account), status_code=resp.status_code
+                data=QueryAccountResponse(account=account),
+                status_code=resp.status_code,
             )
 
         except KeyError as e:
@@ -154,7 +155,8 @@ class Client:
             )
 
     def get_delegator_delegations(
-        self, address: str
+        self,
+        address: str,
     ) -> QueryResponse[QueryDelegatorDelegationsResponse]:
         """
         Query the delegations associated with a delegator.
@@ -174,10 +176,11 @@ class Client:
         try:
 
             delegator_delegations = QueryDelegatorDelegationsResponse.from_dict(
-                resp.data
+                resp.data,
             )
             return QueryResponse(
-                data=delegator_delegations, status_code=resp.status_code
+                data=delegator_delegations,
+                status_code=resp.status_code,
             )
 
         except KeyError as e:
@@ -232,7 +235,8 @@ class Client:
 
         try:
             return QueryResponse(
-                data=SyncInfo.from_dict(resp.data), status_code=resp.status_code
+                data=SyncInfo.from_dict(resp.data),
+                status_code=resp.status_code,
             )
 
         except ValueError as e:

@@ -1,5 +1,5 @@
-from mantrapy.webhooks.modules.smart_contract import get_smart_contracts_events
 from mantrapy.webhooks.hooks.webhook import Webhook
+from mantrapy.webhooks.modules.smart_contract import get_smart_contracts_events
 
 
 class SmartContractWebhook(Webhook):

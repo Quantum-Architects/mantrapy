@@ -29,3 +29,5 @@ share/python-wheels/
 *.egg
 MANIFEST
 proto2
+node_modules
+webhooks.db

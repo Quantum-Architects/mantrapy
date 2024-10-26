@@ -1,5 +1,5 @@
-from mantrapy.webhooks.modules.utils import get_events_by_attr_value
 from mantrapy.webhooks.modules.utils import _get_module_events
+from mantrapy.webhooks.modules.utils import get_events_by_attr_value
 
 MSG_DELEGATE = '/cosmos.staking.v1beta1.MsgDelegate'
 
