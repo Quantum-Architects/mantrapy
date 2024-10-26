@@ -1,0 +1,34 @@
+# Wallet
+
+The lib provides a wallet package to generate new accounts and sign transactions.
+
+## New wallet from mnemonic
+
+```py
+from mantrapy.wallet.wallet import wallet_from_mnemonic
+
+TEST_MNEMONIC = 'anger pencil awful note doctor like slide muffin hungry keen appear eight barrel stone quiz candy loud blush load three analyst buddy health member'  # noqa: E501
+wallet = wallet_from_mnemonic(TEST_MNEMONIC)
+```
+
+## New random wallet
+
+```py
+from mantrapy.wallet.wallet import wallet_from_mnemonic, new_mnemonic
+
+wallet = wallet_from_mnemonic(new_mnemonic())
+```
+
+## Sign a transaction
+
+```py
+signature = wallet.sign_document(sign_doc)
+```
+
+## Getters
+
+```py
+address = wallet.address
+mnemonic = wallet.mnemonic
+privkey = wallet.privkey
+```
