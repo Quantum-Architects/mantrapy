@@ -24,7 +24,7 @@ class WebhookRequest(BaseModel):
 
 
 websocket_url = (
-    'wss://rpc.hongbai.mantrachain.io:443/websocket'  # Replace with your WebSocket URL
+    'wss://rpc.dukong.mantrachain.io:443/websocket'
 )
 chain_client = ChainClient(websocket_url)
 

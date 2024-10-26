@@ -3,7 +3,7 @@ from setuptools import setup
 
 setup(
     name='mantrapy',
-    version='0.0.1',
+    version='0.0.2',
     description='A Python lib to interact with the Mantra chain',
     long_description=open('README.md').read(),
     long_description_content_type='text/markdown',
