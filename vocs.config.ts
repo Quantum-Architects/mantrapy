@@ -8,12 +8,12 @@ export default defineConfig({
       link: "/getting-started",
     },
     {
-      text: "Example",
-      link: "/example",
-    },
-    {
       text: "Wallet",
       link: "/wallet",
+    },
+    {
+      text: "Webhooks API",
+      link: "/webhooks-api",
     },
   ],
 });
