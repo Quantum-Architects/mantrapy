@@ -1,19 +1,24 @@
-import { defineConfig } from 'vocs'
+import { defineConfig } from "vocs";
 
 export default defineConfig({
-  title: 'Docs',
+  basePath: "/mantrapy",
+  title: "Mantra-py",
   sidebar: [
     {
-      text: 'Getting Started',
-      link: '/getting-started',
+      text: "Getting Started",
+      link: "/getting-started",
     },
     {
-      text: 'Webhooks API',
-      link: '/webhooks-api',
+      text: "Wallet",
+      link: "/wallet",
+    },
+    {
+      text: "Webhooks API",
+      link: "/webhooks-api",
     },
     {
       text: 'Webhooks',
       link: '/webhooks',
     },
   ],
-})
+});
