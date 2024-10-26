@@ -22,7 +22,7 @@ setup(
         'httpx>=0.27.2',
         'mnemonic>=0.21',
         'pydantic>=2.9.2',
-        'pydantic-settings>=2.6.0',
+        'pydantic-settings==2.6.0',
         'requests>=2.32.3',
         'SQLAlchemy>=2.0.36',
         'tenacity>=9.0.0',
