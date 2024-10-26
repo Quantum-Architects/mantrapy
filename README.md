@@ -1,4 +1,4 @@
-![image](./docs/public/logo-black.svg)
+![image](./docs/public/logo-snake-black.svg)
 
 Mantra-py is a Python library to interact with the Mantra chain. The library is
 composed by different modules:
