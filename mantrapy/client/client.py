@@ -51,13 +51,13 @@ class Client:
         self.timeout = timeout
         self.max_retries = max_retries
 
-    def create_api_url(self, path: str) -> str:
+    def _create_api_url(self, path: str) -> str:
         """
         Construct a full API URL by appending the given path to the base API URL.
         """
         return self.api + path
 
-    def create_rpc_url(self, path: str) -> str:
+    def _create_rpc_url(self, path: str) -> str:
         """
         Construct a full RPC URL by appending the given path to the base RPC URL.
         """
@@ -104,7 +104,7 @@ class Client:
         Query the account associated with a particular address.
         """
 
-        url = self.create_api_url(QUERY_PATHS['account'].format(address=address))
+        url = self._create_api_url(QUERY_PATHS['account'].format(address=address))
         resp = self._make_request(url)
 
         # Short circuit if response is not successful of returned data is empty.
@@ -130,7 +130,7 @@ class Client:
         Query the balance associated with a particular address.
         """
 
-        url = self.create_api_url(QUERY_PATHS['balances'].format(address=address))
+        url = self._create_api_url(QUERY_PATHS['balances'].format(address=address))
         resp = self._make_request(url)
 
         # Short circuit if response is not successful of returned data is empty.
@@ -157,7 +157,7 @@ class Client:
         Query the delegations associated with a delegator.
         """
 
-        url = self.create_api_url(
+        url = self._create_api_url(
             QUERY_PATHS['delegator_delegations'].format(delegator_address=address),
         )
         resp = self._make_request(url)
@@ -187,7 +187,7 @@ class Client:
     ) -> QueryResponse[QueryDelegationTotalRewardsResponse]:
         """ """
 
-        url = self.create_api_url(
+        url = self._create_api_url(
             QUERY_PATHS['delegation_total_rewards'].format(delegator_address=address),
         )
         resp = self._make_request(url)
@@ -212,7 +212,7 @@ class Client:
             )
 
     def broadcast(self, tx) -> str:
-        url = self.create_api_url(TX_PATHS['tx'])
+        url = self._create_api_url(TX_PATHS['tx'])
         resp = requests.post(
             url=url,
             json=tx,
@@ -225,7 +225,7 @@ class Client:
     # RPC
     # ---------------------------------------------------------------------------------------------
     def _get_sync_info(self) -> QueryResponse[SyncInfo]:
-        url = self.create_rpc_url(QUERY_PATHS['status'])
+        url = self._create_rpc_url(QUERY_PATHS['status'])
         resp = self._make_request(url)
 
         # Short circuit if response is not successful of returned data is empty.
@@ -290,7 +290,7 @@ class Client:
         """
         Query a block associated with a particular height.
         """
-        url = self.create_rpc_url(QUERY_PATHS['block'].format(height=height))
+        url = self._create_rpc_url(QUERY_PATHS['block'].format(height=height))
         resp = self._make_request(url)
 
         if not resp.is_success():
@@ -321,7 +321,7 @@ class Client:
         """
         Query a block associated with a particular hash.
         """
-        url = self.create_rpc_url(QUERY_PATHS['block_by_hash'].format(hash=_hash))
+        url = self._create_rpc_url(QUERY_PATHS['block_by_hash'].format(hash=_hash))
         resp = self._make_request(url)
 
         # Short circuit if response is not successful of returned data is empty.
@@ -350,7 +350,7 @@ class Client:
         """
         Query a transaction associated with a particular hash.
         """
-        url = self.create_rpc_url(QUERY_PATHS['tx'].format(hash=_hash))
+        url = self._create_rpc_url(QUERY_PATHS['tx'].format(hash=_hash))
         resp = self._make_request(url, 'POST')
 
         # Short circuit if response is not successful of returned data is empty.
